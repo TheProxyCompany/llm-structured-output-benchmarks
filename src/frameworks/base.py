@@ -102,7 +102,9 @@ def experiment(
                     responses.append(response)
                     latencies.append(end_time - start_time)
                 except Exception as e:
+                    import traceback
                     logger.error(f"Error in experiment: {e}")
+                    logger.error(traceback.format_exc())
                     pass
 
             num_successful = len(responses)
