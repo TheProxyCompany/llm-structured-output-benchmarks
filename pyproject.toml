@@ -19,6 +19,7 @@ dependencies = [
     "outlines",
     "plotly==5.22.0",
     "setuptools==75.1.0",
+    "sentencepiece",
     "tabulate==0.9.0",
     "torch",
     "transformers",

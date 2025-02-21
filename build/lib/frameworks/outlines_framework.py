@@ -1,9 +1,10 @@
 from typing import Any
 
-from outlines.generate.json import json as outlines_json
-from outlines.models.transformers import transformers as outlines_transformers
-
-from outlines.samplers import MultinomialSampler
+import outlines
+import outlines.generate
+import outlines.generate.json
+import outlines.models
+import outlines.models.transformers
 
 from frameworks.base import BaseFramework, experiment
 
@@ -15,27 +16,14 @@ class OutlinesFramework(BaseFramework):
 
         # TODO: Handle openai model
         if self.llm_model_family == "transformers":
-            outlines_model = outlines_transformers(
-                self.llm_model,
-                device=self.device
+            outlines_model = outlines.models.transformers(
+                self.llm_model, device=self.device
             )
-            outlines_model.model.config.pad_token_id = (
-                outlines_model.model.config.eos_token_id[-1]
-            )
-            if outlines_model.model.generation_config:
-                outlines_model.model.generation_config.pad_token_id = (
-                    outlines_model.model.config.eos_token_id[-1]
-                )
         else:
             raise ValueError(f"Model family: {self.llm_model_family} not supported")
 
-        sampler = MultinomialSampler(
-            top_k=10,
-            top_p=None,
-            temperature=1.0,
-        )
-        self.outline_generator = outlines_json(
-            outlines_model, self.response_model, sampler=sampler
+        self.outline_generator = outlines.generate.json(
+            outlines_model, self.response_model
         )
 
     def run(
@@ -52,5 +40,5 @@ class OutlinesFramework(BaseFramework):
             )
             return response
 
-        predictions, percent_successful, metrics, latencies = run_experiment(inputs) # type: ignore
+        predictions, percent_successful, metrics, latencies = run_experiment(inputs)
         return predictions, percent_successful, metrics, latencies

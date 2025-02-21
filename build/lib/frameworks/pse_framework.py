@@ -60,8 +60,6 @@ class PSEFramework(BaseFramework):
                 max_length=self.max_length,
                 top_p=None,
                 top_k=10,
-                do_sample=True,
-                temperature=1.0,
             )
             # Decode and parse response
             response_text = self.tokenizer.decode(output_ids[0][len(input_ids[0]) :])
