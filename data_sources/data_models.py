@@ -30,9 +30,7 @@ def synthetic_data_generation_model():
     class UserAddress(BaseModel):
         street: str
         city: str
-        six_digit_postal_code: Annotated[
-            str, StringConstraints(min_length=6, max_length=6)
-        ]
+        six_digit_postal_code: int
         country: str
 
         @field_validator("six_digit_postal_code")
