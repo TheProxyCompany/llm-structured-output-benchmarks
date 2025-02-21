@@ -5,6 +5,7 @@ from lmformatenforcer import JsonSchemaParser
 from lmformatenforcer.integrations.transformers import (
     build_transformers_prefix_allowed_tokens_fn,
 )
+import torch
 from transformers import pipeline
 
 from frameworks.base import BaseFramework, experiment
@@ -15,7 +16,7 @@ class LMFormatEnforcerFramework(BaseFramework):
         super().__init__(*args, **kwargs)
         self.parser = JsonSchemaParser(self.response_model.schema())
         max_length = kwargs.get("max_length", 4096)
-
+        torch.mps.empty_cache()
         if self.llm_model_family == "transformers":
             self.hf_pipeline = pipeline(
                 "text-generation",

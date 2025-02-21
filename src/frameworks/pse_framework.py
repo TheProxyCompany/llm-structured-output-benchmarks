@@ -19,6 +19,7 @@ class PSEFramework(BaseFramework):
         if self.llm_model_family != "transformers":
             raise ValueError(f"Model family: {self.llm_model_family} not supported")
 
+        torch.mps.empty_cache()
         self.tokenizer = AutoTokenizer.from_pretrained(self.llm_model)
         self.model = LLamaCausalLMWithPSE.from_pretrained(
             self.llm_model,
