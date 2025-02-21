@@ -26,7 +26,7 @@ class PSEFramework(BaseFramework):
         )
 
         # Add the PSE engine to model
-        self.model.engine = StructuringEngine(self.tokenizer)
+        self.model.engine = StructuringEngine(self.tokenizer, max_resample_attempts=2)
 
         self.model.config.pad_token_id = self.model.config.eos_token_id[-1]
         if self.model.generation_config:

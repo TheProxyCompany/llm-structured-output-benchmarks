@@ -1,8 +1,8 @@
 import dataclasses
 from enum import Enum
-from typing import Any, Optional, Type
+from typing import Any, Optional, Type, Annotated
 
-from pydantic import BaseModel, create_model, field_validator
+from pydantic import BaseModel, create_model, field_validator, StringConstraints
 from pydantic_core import PydanticUndefined
 
 
@@ -30,7 +30,9 @@ def synthetic_data_generation_model():
     class UserAddress(BaseModel):
         street: str
         city: str
-        six_digit_postal_code: int
+        six_digit_postal_code: Annotated[
+            str, StringConstraints(min_length=6, max_length=6)
+        ]
         country: str
 
         @field_validator("six_digit_postal_code")

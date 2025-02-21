@@ -179,7 +179,7 @@ OutlinesFramework:
       prompt: "Extract and resolve a list of entities from the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
       llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
-      retries: 0 # PSE needs no retries
+      retries: 0
       source_data_pickle_path: "data/ner.pkl"
       sample_rows: 2
   - task: "synthetic_data_generation"
