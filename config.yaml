@@ -59,7 +59,7 @@
 #       llm_model_family: "transformers"
 #       max_length: 4096
 
-# PSEFramework:
+PSEFramework:
 #   - task: "multilabel_classification"
 #     n_runs: 10
 #     init_kwargs:
