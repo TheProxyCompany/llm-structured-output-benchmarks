@@ -26,7 +26,7 @@ class PSEFramework(BaseFramework):
         )
 
         # Add the PSE engine to model
-        self.model.engine = StructuringEngine(self.tokenizer, max_resample_attempts=2)
+        self.model.engine = StructuringEngine(self.tokenizer)
 
         self.model.config.pad_token_id = self.model.config.eos_token_id[-1]
         if self.model.generation_config:
@@ -46,10 +46,7 @@ class PSEFramework(BaseFramework):
                 json_schema=self.response_model.model_json_schema(),
                 **inputs
             )
-            messages = [{"role": "user", "content": prompt}]
-            input_ids = self.tokenizer.apply_chat_template(
-                messages, return_tensors="pt", add_generation_prompt=True
-            )
+            input_ids = self.tokenizer.encode(prompt, return_tensors="pt")
             # 5. Generate!
             assert isinstance(input_ids, torch.Tensor)
             input_ids = input_ids.to(self.model.device)
