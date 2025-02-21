@@ -62,7 +62,12 @@ class PSEFramework(BaseFramework):
             )
             # Decode and parse response
             response_text = self.tokenizer.decode(output_ids[0][len(input_ids[0]) :])
-            response = self.response_model(**json.loads(response_text.strip()))
+            try:
+                response = self.response_model(**json.loads(response_text))
+            except Exception as e:
+                print(f"Error parsing response: {e}")
+                print(f"Response text: {response_text}")
+                raise e
             return response
 
         predictions, percent_successful, metrics, latencies = run_experiment(inputs) # type: ignore
