@@ -7,7 +7,7 @@ OutlinesFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0 # Oulines transformers has no retry parameter
       source_data_pickle_path: "data/multilabel_classification.pkl"
@@ -17,7 +17,7 @@ OutlinesFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Extract and resolve a list of entities from the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0
       source_data_pickle_path: "data/ner.pkl"
@@ -26,7 +26,7 @@ OutlinesFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Generate a random person's information. The name must be chosen at random. Make it something you wouldn't normally choose.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
 
@@ -35,7 +35,7 @@ LMFormatEnforcerFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0
       source_data_pickle_path: "data/multilabel_classification.pkl"
@@ -45,7 +45,7 @@ LMFormatEnforcerFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Extract and resolve a list of entities from the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0
       source_data_pickle_path: "data/ner.pkl"
@@ -55,7 +55,7 @@ LMFormatEnforcerFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Generate a random person's information. The name must be chosen at random. Make it something you wouldn't normally choose.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
 
@@ -64,7 +64,7 @@ PSEFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0 # PSE needs no retries
       source_data_pickle_path: "data/multilabel_classification.pkl"
@@ -74,7 +74,7 @@ PSEFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Extract and resolve a list of entities from the following text: {text}.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       retries: 0 # PSE needs no retries
       source_data_pickle_path: "data/ner.pkl"
@@ -83,6 +83,6 @@ PSEFramework:
     n_runs: 10
     init_kwargs:
       prompt: "Generate a random person's information. The name must be chosen at random. Make it something you wouldn't normally choose.\nRespond in the following json schema: {json_schema}:\n"
-      llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+      llm_model: "meta-llama/Llama-3.2-3B-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
