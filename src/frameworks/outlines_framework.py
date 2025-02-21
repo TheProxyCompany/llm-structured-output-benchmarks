@@ -1,6 +1,10 @@
 from typing import Any
 
 import outlines
+import outlines.generate
+import outlines.generate.json
+import outlines.models
+from outlines.models.transformers import Transformers
 
 from frameworks.base import BaseFramework, experiment
 

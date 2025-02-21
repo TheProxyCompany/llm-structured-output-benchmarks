@@ -8,14 +8,14 @@ import yaml
 from loguru import logger
 from tqdm import tqdm
 
-from frameworks import factory, metrics
+from src.frameworks import factory, metrics
 
 app = typer.Typer()
 
 
 @app.command()
 def run_benchmark(config_path: str = "config.yaml"):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "auto"
     logger.info(f"Using device: {device} for local models")
 
     with open(config_path, "r") as file:
@@ -98,7 +98,7 @@ def generate_results(
     allowed_tasks = ["multilabel_classification", "ner", "synthetic_data_generation"]
     if task not in allowed_tasks:
         raise ValueError(f"{task} is not allowed. Allowed values are {allowed_tasks}")
-    
+
     if not results_data_path:
         results_data_path = f"./results/{task}"
 
