@@ -12,7 +12,7 @@ OutlinesFramework:
       retries: 0 # Oulines transformers has no retry parameter
       source_data_pickle_path: "data/multilabel_classification.pkl"
       max_length: 4096
-      # sample_rows: 2
+      sample_rows: 2
   - task: "ner"
     n_runs: 10
     init_kwargs:
@@ -21,7 +21,7 @@ OutlinesFramework:
       llm_model_family: "transformers"
       retries: 0
       source_data_pickle_path: "data/ner.pkl"
-      # sample_rows: 2
+      sample_rows: 2
   - task: "synthetic_data_generation"
     n_runs: 10
     init_kwargs:
@@ -40,7 +40,7 @@ LMFormatEnforcerFramework:
       retries: 0
       source_data_pickle_path: "data/multilabel_classification.pkl"
       max_length: 4096
-      # sample_rows: 2
+      sample_rows: 2
   - task: "ner"
     n_runs: 10
     init_kwargs:
@@ -50,7 +50,7 @@ LMFormatEnforcerFramework:
       retries: 0
       source_data_pickle_path: "data/ner.pkl"
       max_length: 4096
-      # sample_rows: 2
+      sample_rows: 2
   - task: "synthetic_data_generation"
     n_runs: 10
     init_kwargs:
@@ -69,7 +69,7 @@ PSEFramework:
       retries: 0 # PSE needs no retries
       source_data_pickle_path: "data/multilabel_classification.pkl"
       max_length: 4096
-      # sample_rows: 2
+      sample_rows: 2
   - task: "ner"
     n_runs: 10
     init_kwargs:
@@ -78,7 +78,7 @@ PSEFramework:
       llm_model_family: "transformers"
       retries: 0 # PSE needs no retries
       source_data_pickle_path: "data/ner.pkl"
-      # sample_rows: 2
+      sample_rows: 2
   - task: "synthetic_data_generation"
     n_runs: 10
     init_kwargs:

@@ -103,7 +103,6 @@ def experiment(
                     latencies.append(end_time - start_time)
                 except Exception as e:
                     logger.error(f"Error in experiment: {e}")
-                    breakpoint()
                     pass
 
             num_successful = len(responses)
