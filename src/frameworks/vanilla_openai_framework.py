@@ -24,5 +24,5 @@ class VanillaOpenAIFramework(BaseFramework):
             )
             return response.choices[0].message.parsed
 
-        predictions, percent_successful, metrics, latencies = run_experiment(inputs)
+        predictions, percent_successful, metrics, latencies = run_experiment(inputs)  # type: ignore
         return predictions, percent_successful, metrics, latencies

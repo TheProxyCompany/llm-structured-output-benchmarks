@@ -32,14 +32,14 @@ def download_default_classification_dataset(
 
     logger.info("Processing the text and label columns")
     dataset = dataset.rename_columns({text_column: "text", label_column: "class_label"})
-    class_names = dataset.features["class_label"].names
+    class_names = dataset.features["class_label"].names  # type: ignore
 
     dataset = dataset.map(
         lambda row: {"label": class_names[row["class_label"]]},
         remove_columns=["class_label"],
     )
 
-    return dataset.to_pandas()
+    return dataset.to_pandas()  # type: ignore
 
 
 def label_entity(row: dict) -> dict:
@@ -95,14 +95,14 @@ def download_default_ner_dataset(
     dataset = dataset.rename_columns({text_column: "text", label_column: "ner_label"})
 
     logger.info("Processing the text and label columns")
-    df = dataset.to_pandas()
-    df["labels"] = df.apply(label_entity, axis=1)
+    df = dataset.to_pandas()  # type: ignore
+    df["labels"] = df.apply(label_entity, axis=1)  # type: ignore
 
     # Processing names
-    df = df[
-        ~df["labels"].apply(lambda x: "first_name" in x or "last_name" in x)
+    df = df[  # type: ignore
+        ~df["labels"].apply(lambda x: "first_name" in x or "last_name" in x)  # type: ignore
     ].reset_index(drop=True)
-    
+
     df["labels"] = df["labels"].apply(
         lambda x: {("person_name" if k == "name" else k): v for k, v in x.items()}
     )
@@ -133,8 +133,10 @@ def generate_multilabel_data(
     ),
 ) -> None:
     """Generate synthetic multilabel classification data by combining rows from a source dataset."""
-    dest_label_distribution = json.loads(dest_label_distribution)
-    dest_label_distribution = {int(k): v for k, v in dest_label_distribution.items()}
+    dest_label_distribution_dict: dict[str, float] = json.loads(dest_label_distribution)
+    dest_labels: dict[int, float] = {
+        int(k): v for k, v in dest_label_distribution_dict.items()
+    }
     if not source_data_pickle_path:
         logger.info("No source data pickle file provided, downloading default dataset")
         source_dataframe = download_default_classification_dataset()
@@ -146,9 +148,9 @@ def generate_multilabel_data(
 
     multilabel_data = {"text": [], "labels": []}
     for _ in track(range(dest_num_rows), description="Generating rows"):
-        num_rows = random.choices(
-            list(dest_label_distribution.keys()), list(dest_label_distribution.values())
-        )[0]
+        num_rows = random.choices(list(dest_labels.keys()), list(dest_labels.values()))[
+            0
+        ]
         random_rows = source_dataframe.sample(num_rows)
 
         multilabel_data["text"].append(
@@ -193,8 +195,10 @@ def generate_ner_data(
     ),
 ) -> None:
     """Generate synthetic NER data by combining rows from a source dataset."""
-    dest_label_distribution = json.loads(dest_label_distribution)
-    dest_label_distribution = {int(k): v for k, v in dest_label_distribution.items()}
+    dest_label_distribution_dict: dict[str, float] = json.loads(dest_label_distribution)
+    dest_labels: dict[int, float] = {
+        int(k): v for k, v in dest_label_distribution_dict.items()
+    }
     if not source_data_pickle_path:
         logger.info("No source data pickle file provided, downloading default dataset")
         source_dataframe = download_default_ner_dataset()
@@ -209,7 +213,7 @@ def generate_ner_data(
     ].apply(lambda x: len(x.keys()))
 
     ner_data = []
-    for value, fraction in track(dest_label_distribution.items()):
+    for value, fraction in track(dest_labels.items()):
         num_rows = int(dest_num_rows * fraction)
 
         subset_df = source_dataframe[source_dataframe["num_entities"] == value]

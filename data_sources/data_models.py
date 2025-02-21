@@ -7,11 +7,13 @@ from pydantic_core import PydanticUndefined
 
 
 # Multilabel classification model
-def multilabel_classification_model(multilabel_classes):
+def multilabel_classification_model(multilabel_classes: list[str]):
+    MultilabelClasses = Enum(
+        "MultilabelClasses", {name: name for name in multilabel_classes}
+    )
+
     class MultiLabelClassification(BaseModel):
-        classes: list[
-            Enum("MultilabelClasses", {name: name for name in multilabel_classes})
-        ]
+        classes: list[MultilabelClasses]  # type: ignore
 
     return MultiLabelClassification
 
@@ -19,7 +21,7 @@ def multilabel_classification_model(multilabel_classes):
 def ner_model(ner_entities):
     fields = {name: (Optional[list[str]], None) for name in ner_entities}
 
-    NER = create_model("NER", **fields)
+    NER = create_model("NER", **fields)  # type: ignore
 
     return NER
 
@@ -47,7 +49,7 @@ def synthetic_data_generation_model():
 
 def pydantic_to_dataclass(
     klass: Type[BaseModel],
-    classname: str = None,
+    classname: str | None = None,
 ) -> Any:
     """
     Dataclass from Pydantic model
@@ -67,7 +69,7 @@ def pydantic_to_dataclass(
     for name, info in klass.model_fields.items():
         if info.default_factory is not None:
             dataclass_field = dataclasses.field(
-                default_factory=info.default_factory,
+                default_factory=info.default_factory,  # type: ignore
             )
             dataclass_arg = (name, info.annotation, dataclass_field)
         elif info.default is not PydanticUndefined:

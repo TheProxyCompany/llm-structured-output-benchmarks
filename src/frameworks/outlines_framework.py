@@ -4,7 +4,7 @@ import outlines
 import outlines.generate
 import outlines.generate.json
 import outlines.models
-from outlines.models.transformers import Transformers
+import outlines.models.transformers
 
 from frameworks.base import BaseFramework, experiment
 
