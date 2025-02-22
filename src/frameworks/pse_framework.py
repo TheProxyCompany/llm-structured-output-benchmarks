@@ -26,12 +26,13 @@ class PSEFramework(BaseFramework):
             device_map=self.device,
         )
 
-        # Add the PSE engine to model
-        self.model.engine = StructuringEngine(self.tokenizer, multi_token_sampling=True)
-
         self.model.config.pad_token_id = self.model.config.eos_token_id[-1]
         if self.model.generation_config:
             self.model.generation_config.pad_token_id = self.model.config.eos_token_id[-1]
+
+        self.model.engine = StructuringEngine(self.tokenizer, multi_token_sampling=True)
+        if not self.task == "function_calling":
+            self.model.engine.configure(self.response_model.schema())
 
     def run(
         self, task: str, n_runs: int, expected_response: Any = None, inputs: dict = {}
@@ -39,15 +40,23 @@ class PSEFramework(BaseFramework):
 
         @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
         def run_experiment(inputs) -> tuple[list[Any], float, dict, list[list[float]]]:
+            prompt = inputs.get("prompt")
+            if not prompt:
+                prompt = self.prompt.format(
+                    json_schema=self.response_model.model_json_schema(),
+                    **inputs
+                )
             # Configure engine with schema
-            self.model.engine.configure(self.response_model.schema())
+            if "schema" in inputs:
+                schema = inputs.get("schema")
+                self.model.engine.configure(schema)
+            else:
+                self.model.engine.reset()
 
-            # Format prompt and generate response
-            prompt = self.prompt.format(
-                json_schema=self.response_model.model_json_schema(),
-                **inputs
-            )
-            input_ids = self.tokenizer.encode(prompt, return_tensors="pt")
+            if isinstance(prompt, str):
+                prompt = [{"role": "user", "content": prompt}]
+
+            input_ids = self.tokenizer.apply_chat_template(prompt, return_tensors="pt", add_generation_prompt=True)
             # 5. Generate!
             assert isinstance(input_ids, torch.Tensor)
             input_ids = input_ids.to(self.model.device)

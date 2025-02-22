@@ -2,7 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import asdict, is_dataclass
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import pandas as pd
 from loguru import logger
@@ -13,10 +13,23 @@ from data_sources.data_models import (
     multilabel_classification_model,
     ner_model,
     synthetic_data_generation_model,
+    function_calling_model,
+)
+from src.frameworks.metrics import (
+    calculate_metrics,
+    calculate_function_calling_metrics,
 )
 
 
 def response_parsing(response: Any) -> Any:
+    """Parse response into a consistent format.
+
+    Args:
+        response: Raw response from model
+
+    Returns:
+        Parsed response in dictionary format
+    """
     if isinstance(response, list):
         response = {
             member.value if isinstance(member, Enum) else member for member in response
@@ -28,59 +41,39 @@ def response_parsing(response: Any) -> Any:
     return response
 
 
-def calculate_metrics(
-    y_true: dict[str, list[str]], y_pred: dict[str, list[str]]
-) -> dict[str, dict[str, float]]:
-    """Calculate the total True positives, False positives and False negatives for each entity in the NER task.
-
-    Args:
-        y_true (dict[str, list[str]]): The actual labels in the format {"entity1": ["value1", "value2"], "entity2": ["value3"]}
-        y_pred (dict[str, list[str]]): The predicted labels in the format {"entity1": ["value1", "value2"], "entity2": ["value3"]}
-
-    Returns:
-        dict[str, dict[str, float]]: True positives, False positives and False negatives for each entity.
-    """
-    tp: dict[str, float] = {}
-    fp: dict[str, float] = {}
-    fn: dict[str, float] = {}
-    for entity in y_true:
-        tp[entity] = 0.0
-        fp[entity] = 0.0
-        fn[entity] = 0.0
-
-        true_values = set(y_true.get(entity, []))
-        pred_values = set(y_pred.get(entity, []))
-
-        tp[entity] += float(len(true_values & pred_values))
-        fp[entity] += float(len(pred_values - true_values))
-        fn[entity] += float(len(true_values - pred_values))
-
-    return {
-        "true_positives": tp,
-        "false_positives": fp,
-        "false_negatives": fn,
-    }
-
-
 def experiment(
     n_runs: int = 10,
     expected_response: Any = None,
     task: str = "multilabel_classification",
-) -> Callable[..., tuple[list[Any], int, Optional[dict], list[list[float]]]]:
+) -> Callable[
+    ...,
+    tuple[list[Any], float, dict[str, Any] | list[dict[str, Any]] | None, list[float]],
+]:
     """Decorator to run an LLM call function multiple times and return the responses
 
     Args:
         n_runs (int): Number of times to run the function
         expected_response (Any): The expected response. If provided, the decorator will calculate accurary too.
-        task (str): The task being performed. Default is "multilabel_classification". Available options are "multilabel_classification" and "ner"
+        task (str): The task being performed. Default is "multilabel_classification".
+                   Available options are "multilabel_classification", "ner", "synthetic_data_generation", and "function_calling"
 
     Returns:
-        Callable[..., Tuple[List[Any], int, Optional[dict], list[list[float]]]]: A function that returns a list of outputs from the function runs, percent of successful runs, metrics if expected_response is provided else None and list of latencies for each call.
+        Callable[..., tuple[list[Any], float, dict[str, Any] | list[dict[str, Any]] | None, list[float]]]:
+        A function that returns:
+        - List of outputs from the function runs
+        - Percent of successful runs (float between 0 and 1)
+        - Metrics if expected_response is provided, else None
+        - List of latencies for each successful call
     """
 
     def experiment_decorator(func):
         def wrapper(*args, **kwargs):
-            allowed_tasks = ["multilabel_classification", "ner", "synthetic_data_generation"]
+            allowed_tasks = [
+                "multilabel_classification",
+                "ner",
+                "synthetic_data_generation",
+                "function_calling",
+            ]
             if task not in allowed_tasks:
                 raise ValueError(
                     f"{task} is not allowed. Allowed values are {allowed_tasks}"
@@ -88,7 +81,6 @@ def experiment(
 
             responses, latencies = [], []
             for _ in tqdm(range(n_runs), leave=False):
-
                 try:
                     start_time = time.time()
                     response = func(*args, **kwargs)
@@ -103,6 +95,7 @@ def experiment(
                     latencies.append(end_time - start_time)
                 except Exception as e:
                     import traceback
+
                     logger.error(f"Error in experiment: {e}")
                     logger.error(traceback.format_exc())
                     pass
@@ -123,7 +116,20 @@ def experiment(
             elif task == "ner":
                 framework_metrics = []
                 for response in responses:
-                    framework_metrics.append(calculate_metrics(expected_response, response))
+                    framework_metrics.append(
+                        calculate_metrics(expected_response, response)
+                    )
+
+            elif task == "function_calling":
+                framework_metrics = []
+                for response in responses:
+                    # Don't wrap in list since calculate_function_calling_metrics handles single calls
+                    metrics = calculate_function_calling_metrics(
+                        expected_response, response
+                    )
+                    framework_metrics.append(
+                        [metrics]
+                    )  # Keep outer list for consistency with data structure
 
             return (
                 responses,
@@ -196,6 +202,9 @@ class BaseFramework(ABC):
 
         elif self.task == "synthetic_data_generation":
             self.response_model = synthetic_data_generation_model()
+
+        elif self.task == "function_calling":
+            self.response_model = function_calling_model()
 
         logger.info(f"Response model is {self.response_model}")
 

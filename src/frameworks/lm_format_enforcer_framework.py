@@ -47,13 +47,36 @@ class LMFormatEnforcerFramework(BaseFramework):
     ) -> tuple[list[Any], float, dict, list[list[float]]]:
         @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
         def run_experiment(inputs):
-            prompt = self.prompt.format(
-                json_schema=self.response_model.schema(), **inputs
+            prompt = inputs.get("prompt")
+            if not prompt:
+                prompt = self.prompt.format(
+                    json_schema=self.response_model.model_json_schema(), **inputs
+                )
+
+            if isinstance(prompt, str):
+                prompt = [{"role": "user", "content": prompt}]
+
+            assert self.hf_pipeline.tokenizer is not None
+            formatted_prompt = (
+                self.hf_pipeline.tokenizer.apply_chat_template(
+                    prompt, tokenize=False, add_generation_prompt=True
+                )
             )
+
+            assert isinstance(formatted_prompt, str)
+            if "schema" in inputs:
+                schema = inputs.get("schema")
+                self.parser = JsonSchemaParser(schema)
+                self.prefix_function = build_transformers_prefix_allowed_tokens_fn(
+                    self.hf_pipeline.tokenizer,  # type: ignore
+                    self.parser,
+                )
+
             response = self.hf_pipeline(
-                prompt, prefix_allowed_tokens_fn=self.prefix_function
+                formatted_prompt,
+                prefix_allowed_tokens_fn=self.prefix_function
             )
-            response = response[0]["generated_text"][len(prompt) :].strip()  # type: ignore
+            response = response[0]["generated_text"][len(formatted_prompt) :].strip()  # type: ignore
             response = self.response_model(**json.loads(response))
             return response
 

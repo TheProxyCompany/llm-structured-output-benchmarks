@@ -236,6 +236,44 @@ def generate_ner_data(
     ner_df.to_pickle("data/ner.pkl")
     logger.info("Saved NER data to: data/ner.pkl")
 
+def download_function_calling_dataset() -> pd.DataFrame:
+    """Download the default classification dataset from Hugging Face's datasets library. Defaults to the AmazonScience/massive dataset.
+
+    Args:
+        text_column (str, optional): The column name for the text data. Defaults to "utt" as defined in the default dataset.
+        label_column (str, optional):  The column name for the labels. Defaults to "intent" as defined in the default dataset.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with the text and label columns.
+    """
+    logger.info(
+        "Downloading source data from https://huggingface.co/datasets/fireworks-ai/function-calling-eval-dataset-v0"
+    )
+    dataset = load_dataset(
+        "fireworks-ai/function-calling-eval-dataset-v0",
+        split="single_turn"
+    )
+    dataset = dataset.select_columns(["prompt", "completion", "tools"])
+    return dataset.to_pandas()  # type: ignore
+
+@app.command()
+def generate_function_calling_data(
+    dest_num_rows: int = Option(
+        100, help="Number of rows to keep in the final dataframe."
+    ),
+) -> None:
+    """Generate function calling data by sampling rows from a source dataset."""
+    source_dataframe = download_function_calling_dataset()
+    logger.info(f"Generating {dest_num_rows} synthetic rows")
+
+    # the dataset is already in the format we want, so just sample and save.
+    function_calling_df = source_dataframe.sample(
+        n=dest_num_rows, random_state=1
+    ).reset_index(drop=True)
+
+    logger.info(f"First 5 rows:\n{function_calling_df.head()}")
+    function_calling_df.to_pickle("data/function_calling.pkl")
+    logger.info("Saved function calling data to: data/function_calling.pkl")
 
 if __name__ == "__main__":
     app()

@@ -78,3 +78,12 @@ def pydantic_to_dataclass(
         classname or f"{klass.__name__}",
         dataclass_args,
     )
+
+
+def function_calling_model():
+
+    class FunctionCall(BaseModel):
+        name: str
+        arguments: dict[str, Any]
+
+    return FunctionCall
