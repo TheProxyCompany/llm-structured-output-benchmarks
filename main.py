@@ -119,38 +119,8 @@ def generate_results(
             )
             continue
 
-        results = pd.DataFrame(results)
-        # Calculate metrics
-        breakpoint()
         try:
-            if current_task == "multilabel_classification":
-                print_benchmark_results(
-                    "Multilabel Classification",
-                    num_samples=len(
-                        results["Multilabel Classification"]["predictions"]
-                    ),
-                    num_runs=len(results["Multilabel Classification"]["latencies"]),
-                    df=results,
-                )
-
-            elif current_task == "synthetic_data_generation":
-                print_benchmark_results(
-                    "Synthetic Data Generation",
-                    num_samples=len(
-                        results["Synthetic Data Generation"]["predictions"]
-                    ),
-                    num_runs=len(results["Synthetic Data Generation"]["latencies"]),
-                    df=results,
-                )
-
-            elif current_task == "function_calling":
-                print_benchmark_results(
-                    "Function Calling",
-                    num_samples=len(results["Function Calling"]["predictions"]),
-                    num_runs=len(results["Function Calling"]["latencies"]),
-                    df=results,
-                )
-
+            pass
         except Exception as e:
             logger.error(f"Error calculating metrics: {str(e)}")
             logger.exception(e)

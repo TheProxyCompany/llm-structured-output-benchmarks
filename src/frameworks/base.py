@@ -6,7 +6,6 @@ import torch
 from loguru import logger
 
 from data_sources.data_models import (
-    MultiLabelClassification,
     User,
     FunctionCall,
 )
@@ -45,9 +44,7 @@ class BaseFramework(ABC):
             logger.info(f"Loaded source data from {source_data_pickle_path}")
 
         # Create the response model
-        if self.task == "multilabel_classification":
-            self.response_model = MultiLabelClassification
-        elif self.task == "synthetic_data_generation":
+        if self.task == "synthetic_data_generation":
             self.response_model = User
         elif self.task == "function_calling":
             self.response_model = FunctionCall
@@ -72,47 +69,37 @@ class BaseFramework(ABC):
         """
 
         try:
-            if row is not None:
-                if task == "function_calling":
-                    # Handle function calling data format
-                    tools = json.loads(row.tools)
-                    tool_schemas = [
-                        {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "const",
-                                    "const": tool["function"]["name"],
-                                },
-                                "arguments": tool["function"]["parameters"],
-                            },
-                            "required": ["name", "arguments"],
-                        }
-                        for tool in tools
-                    ]
-                    inputs = {
-                        "prompt": row.prompt,  # List of message dicts
-                        "schema": {"anyOf": tool_schemas},
-                    }
-                    expected = json.loads(row.completion.split("<functioncall>")[1])
-                    result = self.run(
-                        n_runs=n_runs,
-                        expected_response=expected,
-                        inputs=inputs,
-                    )
-                else:
-                    # Handle other tasks' labeled data
-                    labels = set(row.labels) if isinstance(row.labels, list) else row.labels
-                    result = self.run(
-                        n_runs=n_runs,
-                        expected_response=labels,
-                        inputs={"text": row.text},
-                    )
-
-            else:
-                # Handle unlabeled/synthetic data case
+            if not row:
                 result = self.run(n_runs=n_runs, expected_response=None)
+                return result
 
+            if task == "function_calling":
+                # Handle function calling data format
+                tools = json.loads(row.tools)
+                tool_schemas = [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "const",
+                                "const": tool["function"]["name"],
+                            },
+                            "arguments": tool["function"]["parameters"],
+                        },
+                        "required": ["name", "arguments"],
+                    }
+                    for tool in tools
+                ]
+                inputs = {
+                    "prompt": row.prompt,  # List of message dicts
+                    "schema": {"anyOf": tool_schemas},
+                }
+                expected = json.loads(row.completion.split("<functioncall>")[1])
+                result = self.run(
+                    n_runs=n_runs,
+                    expected_response=expected,
+                    inputs=inputs,
+                )
         except Exception as e:
             logger.error(f"Error during framework evaluation: {str(e)}")
             logger.exception(e)

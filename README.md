@@ -57,3 +57,20 @@ This is a quick fork from the original [llm-structured-output-benchmarks](https:
         1. Latency: The 95th percentile of the time taken to run the framework on the data.
         1. Variety: The percent of names that are unique compared to all names generated.
     - **Experiment Details**: Run each row through the framework `n_runs` number of times and log the percent of successful runs.
+
+2. Function Calling
+    - **Task**: Evaluate the framework's ability to parse natural language into structured function calls
+    - **Data**:
+        - Sourced from fireworks-ai/function-calling-eval-dataset-v0
+        - Contains prompts, expected function call completions, and available tools/functions
+        - Sampled to create evaluation dataset (default 100 rows)
+    - **Model**: meta-llama/Llama-3.1-8b-Instruct
+    - **Evaluation Metrics**:
+        1. Reliability: Percentage of successful function call parsings across n_runs
+        2. Latency: 95th percentile of execution time per function call
+        3. Accuracy: Match between predicted and expected function calls
+    - **Experiment Details**:
+        - Each framework runs 10 times per sample
+        - Uses 3 sample rows from dataset
+        - Maximum sequence length of 4096 tokens
+        - Results saved as pickled dataframes for analysis
