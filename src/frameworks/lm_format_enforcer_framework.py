@@ -8,7 +8,7 @@ from lmformatenforcer.integrations.transformers import (
 from transformers import pipeline
 
 from src.frameworks.base import BaseFramework
-from src.experiment import experiment
+from src.experiment import experiment, ExperimentResult
 
 
 class LMFormatEnforcerFramework(BaseFramework):
@@ -41,10 +41,9 @@ class LMFormatEnforcerFramework(BaseFramework):
         else:
             raise ValueError(f"Model family: {self.llm_model_family} not supported")
 
-    def run(
-        self, task: str, n_runs: int, expected_response: Any = None, inputs: dict = {}
-    ) -> tuple[list[Any], float, dict, list[list[float]]]:
-        @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
+    def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
+
+        @experiment(n_runs=n_runs, expected_response=expected_response)
         def run_experiment(inputs):
             prompt = inputs.get("prompt")
             if not prompt:
@@ -79,5 +78,4 @@ class LMFormatEnforcerFramework(BaseFramework):
             response = self.response_model(**json.loads(response))
             return response
 
-        predictions, percent_successful, metrics, latencies = run_experiment(inputs)  # type: ignore
-        return predictions, percent_successful, metrics, latencies
+        return run_experiment(inputs) # type: ignore

@@ -1,23 +1,37 @@
-
+from dataclasses import asdict, dataclass, is_dataclass
 import logging
 import time
+from enum import Enum
 from typing import Any, Callable
 
+from pydantic import BaseModel
 import torch
 from tqdm import tqdm
 
-from src.metrics import calculate_function_calling_metrics
-from src.frameworks.base import response_parsing
-
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ExperimentResult:
+    responses: list[Any]
+    latencies: list[float]
+    expected_response: Any
+    n_runs: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "expected_response": self.expected_response,
+            "responses": self.responses,
+            "latencies": self.latencies,
+            "n_runs": self.n_runs,
+        }
 
 def experiment(
     n_runs: int = 10,
     expected_response: Any = None,
-    task: str = "multilabel_classification",
 ) -> Callable[
     ...,
-    tuple[list[Any], float, dict[str, Any] | list[dict[str, Any]] | None, list[float]],
+    ExperimentResult,
 ]:
     """Decorator to run an LLM call function multiple times and return the responses
 
@@ -25,29 +39,19 @@ def experiment(
         n_runs (int): Number of times to run the function
         expected_response (Any): The expected response. If provided, the decorator will calculate accurary too.
         task (str): The task being performed. Default is "multilabel_classification".
-                   Available options are "multilabel_classification", "ner", "synthetic_data_generation", and "function_calling"
+                   Available options are "multilabel_classification", "synthetic_data_generation", and "function_calling"
 
     Returns:
-        Callable[..., tuple[list[Any], float, dict[str, Any] | list[dict[str, Any]] | None, list[float]]]:
+        Callable[..., ExperimentResult]:
         A function that returns:
         - List of outputs from the function runs
-        - Percent of successful runs (float between 0 and 1)
-        - Metrics if expected_response is provided, else None
         - List of latencies for each successful call
     """
 
-    def experiment_decorator(func):
-        def wrapper(*args, **kwargs):
-            allowed_tasks = [
-                "multilabel_classification",
-                "synthetic_data_generation",
-                "function_calling",
-            ]
-            if task not in allowed_tasks:
-                raise ValueError(
-                    f"{task} is not allowed. Allowed values are {allowed_tasks}"
-                )
-
+    def experiment_decorator(
+        func: Callable[..., Any],
+    ) -> Callable[..., ExperimentResult]:
+        def wrapper(*args, **kwargs) -> ExperimentResult:
             responses, latencies = [], []
             for _ in tqdm(range(n_runs), leave=False):
                 try:
@@ -59,9 +63,6 @@ def experiment(
 
                     response = response_parsing(response)
 
-                    if "classes" in response:
-                        response = response_parsing(response["classes"])
-
                     responses.append(response)
                     latencies.append(end_time - start_time)
                 except Exception as e:
@@ -69,40 +70,34 @@ def experiment(
 
                     logger.error(f"Error in experiment: {e}")
                     logger.error(traceback.format_exc())
-                    pass
 
-            num_successful = len(responses)
-            percent_successful = num_successful / n_runs
-
-            # Metrics calculation
-            if task == "multilabel_classification" and expected_response:
-                accurate = 0
-                for response in responses:
-                    if response == expected_response:
-                        accurate += 1
-
-                framework_metrics = {
-                    "accuracy": accurate / num_successful if num_successful else 0
-                }
-
-            elif task == "function_calling":
-                framework_metrics = []
-                for response in responses:
-                    # Don't wrap in list since calculate_function_calling_metrics handles single calls
-                    metrics = calculate_function_calling_metrics(
-                        expected_response, response
-                    )
-                    framework_metrics.append(
-                        [metrics]
-                    )  # Keep outer list for consistency with data structure
-
-            return (
-                responses,
-                percent_successful,
-                framework_metrics if expected_response else None,
-                latencies,
+            return ExperimentResult(
+                responses=responses,
+                latencies=latencies,
+                expected_response=expected_response,
+                n_runs=n_runs,
             )
 
         return wrapper
 
     return experiment_decorator  # type: ignore
+
+
+def response_parsing(response: Any) -> Any:
+    """Parse response into a consistent format.
+
+    Args:
+        response: Raw response from model
+
+    Returns:
+        Parsed response in dictionary format
+    """
+    if isinstance(response, list):
+        response = {
+            member.value if isinstance(member, Enum) else member for member in response
+        }
+    elif is_dataclass(response):
+        response = asdict(response)  # type: ignore
+    elif isinstance(response, BaseModel):
+        response = response.model_dump(exclude_none=True)
+    return response

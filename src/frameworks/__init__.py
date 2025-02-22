@@ -32,7 +32,6 @@ def factory(class_name: str, *args: Any, **kwargs: Any) -> BaseFramework:
         TypeError: If the class does not inherit from BaseFramework
 
     Examples:
-        >>> framework = factory("PSEFramework", task="ner", device="cuda")
         >>> framework = factory("OutlinesFramework", task="multilabel_classification")
         >>> framework = factory("LMFormatEnforcerFramework", task="function_calling")
     """

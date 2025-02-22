@@ -18,15 +18,15 @@ OutlinesFramework:
       llm_model_family: "transformers"
       max_length: 4096
       sample_rows: 3
-  - task: "multilabel_classification"
-    n_runs: 3
-    init_kwargs:
-      prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
-      llm_model: "meta-llama/Llama-3.1-8b-Instruct"
-      llm_model_family: "transformers"
-      source_data_pickle_path: "data/multilabel_classification.pkl"
-      max_length: 4096
-      sample_rows: 3
+  # - task: "multilabel_classification"
+  #   n_runs: 3
+  #   init_kwargs:
+  #     prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
+  #     llm_model: "meta-llama/Llama-3.1-8b-Instruct"
+  #     llm_model_family: "transformers"
+  #     source_data_pickle_path: "data/multilabel_classification.pkl"
+  #     max_length: 4096
+  #     sample_rows: 3
 
 LMFormatEnforcerFramework:
   - task: "synthetic_data_generation"
@@ -44,15 +44,15 @@ LMFormatEnforcerFramework:
       llm_model_family: "transformers"
       max_length: 4096
       sample_rows: 3
-  - task: "multilabel_classification"
-    n_runs: 3
-    init_kwargs:
-      prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
-      llm_model: "meta-llama/Llama-3.1-8b-Instruct"
-      llm_model_family: "transformers"
-      source_data_pickle_path: "data/multilabel_classification.pkl"
-      max_length: 4096
-      sample_rows: 3
+  # - task: "multilabel_classification"
+  #   n_runs: 3
+  #   init_kwargs:
+  #     prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
+  #     llm_model: "meta-llama/Llama-3.1-8b-Instruct"
+  #     llm_model_family: "transformers"
+  #     source_data_pickle_path: "data/multilabel_classification.pkl"
+  #     max_length: 4096
+  #     sample_rows: 3
 
 PSEFramework:
   - task: "synthetic_data_generation"
@@ -70,12 +70,12 @@ PSEFramework:
       llm_model_family: "transformers"
       max_length: 4096
       sample_rows: 3
-  - task: "multilabel_classification"
-    n_runs: 3
-    init_kwargs:
-      prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
-      llm_model: "meta-llama/Llama-3.1-8b-Instruct"
-      llm_model_family: "transformers"
-      source_data_pickle_path: "data/multilabel_classification.pkl"
-      max_length: 4096
-      sample_rows: 3
+  # - task: "multilabel_classification"
+  #   n_runs: 3
+  #   init_kwargs:
+  #     prompt: "Classify the following text: {text}.\nRespond in the following json schema: {json_schema}\n"
+  #     llm_model: "meta-llama/Llama-3.1-8b-Instruct"
+  #     llm_model_family: "transformers"
+  #     source_data_pickle_path: "data/multilabel_classification.pkl"
+  #     max_length: 4096
+  #     sample_rows: 3

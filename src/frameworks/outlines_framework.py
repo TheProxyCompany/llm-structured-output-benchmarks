@@ -7,7 +7,7 @@ from outlines.models.transformers import transformers as outlines_transformers
 from outlines.samplers import MultinomialSampler
 
 from src.frameworks.base import BaseFramework
-from src.experiment import experiment
+from src.experiment import experiment, ExperimentResult
 
 
 class OutlinesFramework(BaseFramework):
@@ -35,10 +35,9 @@ class OutlinesFramework(BaseFramework):
             self.outlines_model, self.response_model, sampler=self.sampler
         )
 
-    def run(
-        self, task: str, n_runs: int, expected_response: Any = None, inputs: dict = {}
-    ) -> tuple[list[Any], float, dict, list[list[float]]]:
-        @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
+    def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
+
+        @experiment(n_runs=n_runs, expected_response=expected_response)
         def run_experiment(inputs):
             prompt = inputs.get("prompt")
             if not prompt:
@@ -65,5 +64,4 @@ class OutlinesFramework(BaseFramework):
             )
             return response
 
-        predictions, percent_successful, metrics, latencies = run_experiment(inputs) # type: ignore
-        return predictions, percent_successful, metrics, latencies
+        return run_experiment(inputs) # type: ignore

@@ -5,7 +5,7 @@ import json
 
 import torch
 from src.frameworks.base import BaseFramework
-from src.experiment import experiment
+from src.experiment import experiment, ExperimentResult
 
 from transformers import LlamaForCausalLM, AutoTokenizer
 from pse.engine.structuring_engine import StructuringEngine
@@ -45,11 +45,9 @@ class PSEFramework(BaseFramework):
         if not self.task == "function_calling":
             self.model.engine.configure(self.response_model.schema())
 
-    def run(
-        self, task: str, n_runs: int, expected_response: Any = None, inputs: dict = {}
-    ) -> tuple[list[Any], float, dict, list[list[float]]]:
+    def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
 
-        @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
+        @experiment(n_runs=n_runs, expected_response=expected_response)
         def run_experiment(inputs) -> tuple[list[Any], float, dict, list[list[float]]]:
             prompt = inputs.get("prompt")
             if not prompt:
@@ -91,5 +89,4 @@ class PSEFramework(BaseFramework):
                 raise e
             return response
 
-        predictions, percent_successful, metrics, latencies = run_experiment(inputs) # type: ignore
-        return predictions, percent_successful, metrics, latencies
+        return run_experiment(inputs) # type: ignore
