@@ -5,7 +5,6 @@ from lmformatenforcer import JsonSchemaParser
 from lmformatenforcer.integrations.transformers import (
     build_transformers_prefix_allowed_tokens_fn,
 )
-import torch
 from transformers import pipeline
 
 from src.frameworks.base import BaseFramework
@@ -47,7 +46,6 @@ class LMFormatEnforcerFramework(BaseFramework):
     ) -> tuple[list[Any], float, dict, list[list[float]]]:
         @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
         def run_experiment(inputs):
-            torch.mps.empty_cache()
             prompt = inputs.get("prompt")
             if not prompt:
                 prompt = self.prompt.format(

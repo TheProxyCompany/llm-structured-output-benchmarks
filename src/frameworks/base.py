@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any
 
 import pandas as pd
+import torch
 from loguru import logger
 from pydantic import BaseModel
 
@@ -51,6 +52,8 @@ class BaseFramework(ABC):
         self.retries = kwargs.get("retries", 0)
         self.device = kwargs.get("device", "cpu")
         source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
+
+        torch.mps.empty_cache()
 
         # Load the data
         if source_data_pickle_path:
