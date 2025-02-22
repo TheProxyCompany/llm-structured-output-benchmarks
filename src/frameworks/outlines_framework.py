@@ -5,17 +5,15 @@ from outlines.generate.json import json as outlines_json
 from outlines.models.transformers import transformers as outlines_transformers
 
 from outlines.samplers import MultinomialSampler
-import torch
 
-from frameworks.base import BaseFramework, experiment
+from src.frameworks.base import BaseFramework
+from src.experiment import experiment
 
 
 class OutlinesFramework(BaseFramework):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.max_length = kwargs.get("max_length", 4096)
-
-        torch.mps.empty_cache()
         self.outlines_model = outlines_transformers(
             self.llm_model,
             device=self.device

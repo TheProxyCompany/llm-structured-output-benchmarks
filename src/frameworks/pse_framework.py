@@ -1,14 +1,27 @@
+import logging
 from typing import Any
 
 import json
 
 import torch
-from frameworks.base import BaseFramework, experiment
+from src.frameworks.base import BaseFramework
+from src.experiment import experiment
+
 from transformers import LlamaForCausalLM, AutoTokenizer
 from pse.engine.structuring_engine import StructuringEngine
 from pse.util.torch_mixin import PSETorchMixin
 
+logger = logging.getLogger(__name__)
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     stream=sys.stdout
+# )
+
 class LLamaCausalLMWithPSE(LlamaForCausalLM, PSETorchMixin):
+    """
+    This is an easy way to integrate the StructuringEngine's functionality
+    into a LlamaForCausalLM model.
+    """
     pass
 
 class PSEFramework(BaseFramework):
@@ -18,8 +31,6 @@ class PSEFramework(BaseFramework):
 
         if self.llm_model_family != "transformers":
             raise ValueError(f"Model family: {self.llm_model_family} not supported")
-
-        torch.mps.empty_cache()
         self.tokenizer = AutoTokenizer.from_pretrained(self.llm_model)
         self.model = LLamaCausalLMWithPSE.from_pretrained(
             self.llm_model,

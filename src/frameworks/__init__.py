@@ -1,9 +1,9 @@
 from typing import Any, Dict, Type
 
-from frameworks.base import BaseFramework, experiment
-from frameworks.outlines_framework import OutlinesFramework
-from frameworks.pse_framework import PSEFramework
-from frameworks.lm_format_enforcer_framework import LMFormatEnforcerFramework
+from src.frameworks.base import BaseFramework
+from src.frameworks.outlines_framework import OutlinesFramework
+from src.frameworks.pse_framework import PSEFramework
+from src.frameworks.lm_format_enforcer_framework import LMFormatEnforcerFramework
 
 # Registry of available frameworks
 FRAMEWORK_REGISTRY: Dict[str, Type[BaseFramework]] = {
@@ -52,7 +52,6 @@ def factory(class_name: str, *args: Any, **kwargs: Any) -> BaseFramework:
 
 
 __all__ = [
-    "experiment",
     "factory",
     "OutlinesFramework",
     "PSEFramework",

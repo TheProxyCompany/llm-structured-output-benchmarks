@@ -29,3 +29,6 @@ dependencies = [
     "httpx==0.27.2",
     "bitsandbytes"
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]

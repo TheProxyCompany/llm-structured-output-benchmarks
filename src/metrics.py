@@ -135,9 +135,7 @@ def analyze_arguments(
         "missing": list(missing_args),
         "value_mismatches": value_mismatches,
         "matching_values": matching_values,
-        "avg_value_similarity": round(total_similarity / len(matching_args), 3)
-        if matching_args
-        else 0.0,
+        "avg_value_similarity": round(total_similarity / max(len(matching_args), 1), 3),
     }
 
 
@@ -299,11 +297,13 @@ def calculate_function_calling_metrics(
         )
 
         # Structural correctness
-        arg_coverage = matching_args / total_expected if total_expected else 1.0
+        arg_coverage = matching_args / total_expected if total_expected > 0 else 0.0
 
         # Type safety (penalize hallucination)
         type_safety = 1.0 - (
-            len(argument_metrics["extra"]) / total_predicted if total_predicted else 0.0
+            len(argument_metrics["extra"]) / total_predicted
+            if total_predicted > 0
+            else 0.0
         )
 
         # Combined schema score
@@ -323,7 +323,9 @@ def calculate_function_calling_metrics(
 
         # Hallucination penalty
         hallucination_penalty = (
-            len(argument_metrics["extra"]) / total_predicted if total_predicted else 0.0
+            len(argument_metrics["extra"]) / total_predicted
+            if total_predicted > 0
+            else 0.0
         )
 
         # Combined value score
@@ -435,63 +437,11 @@ def latency_metric(
     return latency_df.round(3).sort_values(f"Latency_p{percentile}(s)", ascending=True)
 
 
-def ner_micro_metrics(results: dict[str, dict[str, Any]]) -> pd.DataFrame:
-    """Calculate micro-averaged metrics for NER results.
-
-    Args:
-        results: Dictionary containing NER evaluation results per framework
-
-    Returns:
-        DataFrame with micro-precision, recall, and F1 scores
-    """
-    micro_metrics = {
-        "framework": [],
-        "micro_precision": [],
-        "micro_recall": [],
-        "micro_f1": [],
-    }
-
-    for framework, framework_results in results.items():
-        tp_total, fp_total, fn_total = 0, 0, 0
-
-        # Sum up metrics across all runs
-        for run in framework_results.get("metrics", []):
-            for metric in run:
-                tp_total += sum(metric["true_positives"].values())
-                fp_total += sum(metric["false_positives"].values())
-                fn_total += sum(metric["false_negatives"].values())
-
-        # Calculate micro-averaged metrics
-        micro_precision = (
-            tp_total / (tp_total + fp_total) if (tp_total + fp_total) > 0 else 0
-        )
-        micro_recall = (
-            tp_total / (tp_total + fn_total) if (tp_total + fn_total) > 0 else 0
-        )
-        micro_f1 = (
-            2 * micro_precision * micro_recall / (micro_precision + micro_recall)
-            if (micro_precision + micro_recall) > 0
-            else 0
-        )
-
-        framework_name = framework.replace("Framework", "")
-        micro_metrics["framework"].append(framework_name)
-        micro_metrics["micro_precision"].append(micro_precision)
-        micro_metrics["micro_recall"].append(micro_recall)
-        micro_metrics["micro_f1"].append(micro_f1)
-
-    return pd.DataFrame(micro_metrics).round(3)
-
-
 def variety_metric(predictions: dict[str, list[dict[str, Any]]]) -> pd.DataFrame:
-    """Calculate variety scores for function calling predictions.
+    """Calculate variety scores for function calling predictions."""
+    if not predictions:
+        return pd.DataFrame(columns=["Variety"])
 
-    Args:
-        predictions: Dictionary mapping framework names to lists of function call predictions
-
-    Returns:
-        DataFrame with variety scores for each framework
-    """
     variety_scores = {}
 
     for framework, calls in predictions.items():
@@ -509,37 +459,3 @@ def variety_metric(predictions: dict[str, list[dict[str, Any]]]) -> pd.DataFrame
         columns=["Variety"],
     )
     return variety_df.round(3).sort_values("Variety", ascending=False)
-
-
-def calculate_metrics(
-    y_true: dict[str, list[str]], y_pred: dict[str, list[str]]
-) -> dict[str, dict[str, float]]:
-    """Calculate the total True positives, False positives and False negatives for each entity in the NER task.
-
-    Args:
-        y_true (dict[str, list[str]]): The actual labels in the format {"entity1": ["value1", "value2"], "entity2": ["value3"]}
-        y_pred (dict[str, list[str]]): The predicted labels in the format {"entity1": ["value1", "value2"], "entity2": ["value3"]}
-
-    Returns:
-        dict[str, dict[str, float]]: True positives, False positives and False negatives for each entity.
-    """
-    tp: dict[str, float] = {}
-    fp: dict[str, float] = {}
-    fn: dict[str, float] = {}
-    for entity in y_true:
-        tp[entity] = 0.0
-        fp[entity] = 0.0
-        fn[entity] = 0.0
-
-        true_values = set(y_true.get(entity, []))
-        pred_values = set(y_pred.get(entity, []))
-
-        tp[entity] += float(len(true_values & pred_values))
-        fp[entity] += float(len(pred_values - true_values))
-        fn[entity] += float(len(true_values - pred_values))
-
-    return {
-        "true_positives": tp,
-        "false_positives": fp,
-        "false_negatives": fn,
-    }

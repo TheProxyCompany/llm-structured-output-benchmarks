@@ -194,27 +194,6 @@ def run_benchmark(config_path: str = "config.yaml"):
             save_results(results, task, config_key)
 
 
-def fraction_to_percentage(fraction_str: str) -> str:
-    """Convert a fraction string (e.g. '3/4') to a percentage string.
-
-    Args:
-        fraction_str: String in format 'numerator/denominator'
-
-    Returns:
-        Formatted percentage string
-    """
-    try:
-        if "/" not in fraction_str:
-            return fraction_str
-        num, denom = map(float, fraction_str.split("/"))
-        if denom == 0:
-            return "0.0%"
-        return f"{(num / denom) * 100:>6.1f}%"
-    except Exception as e:
-        logger.error(f"Error converting fraction to percentage: {str(e)}")
-        return fraction_str
-
-
 def print_benchmark_results(task_name: str, df: pd.DataFrame) -> None:
     """Print benchmark results in a clean, formatted way.
 
@@ -239,14 +218,6 @@ def print_benchmark_results(task_name: str, df: pd.DataFrame) -> None:
     numeric_cols = df.select_dtypes(include=[np.number]).columns
     for col in numeric_cols:
         df[col] = df[col].apply(lambda x: f"{x:>8.3f}")
-
-    # Convert fraction strings to percentages
-    for col in df.columns:
-        df[col] = df[col].apply(
-            lambda x: fraction_to_percentage(str(x))
-            if isinstance(x, str) and "/" in x
-            else x
-        )
 
     # Print with consistent spacing
     print(
@@ -273,7 +244,7 @@ def generate_results(
     """
     allowed_tasks = [
         "multilabel_classification",
-        "ner",
+        # "ner",
         "synthetic_data_generation",
         "function_calling",
     ]
@@ -341,7 +312,7 @@ def generate_results(
 
                     metrics_data[framework_name] = [
                         latency_p95,
-                        f"{sum(value['percent_successful'])}/{len(value['percent_successful'])}",
+                        f"{int(sum(value['percent_successful']))}/{len(value['percent_successful'])}",
                         f"{accurate_count}/{total_count}" if total_count > 0 else "0/0",
                     ]
 
@@ -377,14 +348,14 @@ def generate_results(
 
                     metrics_data[framework_name] = [
                         latency_p95,
-                        f"{sum(value['percent_successful'])}/{len(value['percent_successful'])}",
-                        f"{tp_total}/{tp_total + fp_total}"
+                        f"{int(sum(value['percent_successful']))}/{len(value['percent_successful'])}",
+                        f"{int(tp_total)}/{int(tp_total + fp_total)}"
                         if (tp_total + fp_total) > 0
                         else "0/0",
-                        f"{tp_total}/{tp_total + fn_total}"
+                        f"{int(tp_total)}/{int(tp_total + fn_total)}"
                         if (tp_total + fn_total) > 0
                         else "0/0",
-                        f"{2 * tp_total}/{2 * tp_total + fp_total + fn_total}"
+                        f"{int(2 * tp_total)}/{int(2 * tp_total + fp_total + fn_total)}"
                         if (tp_total + fp_total + fn_total) > 0
                         else "0/0",
                     ]
@@ -422,7 +393,7 @@ def generate_results(
 
                     metrics_data[framework_name] = [
                         latency_p95,
-                        f"{sum(value['percent_successful'])}/{len(value['percent_successful'])}",
+                        f"{int(sum(value['percent_successful']))}/{len(value['percent_successful'])}",
                         variety,
                     ]
 
@@ -531,17 +502,6 @@ def generate_results(
                         if num_runs
                         else 0
                     )
-                    avg_matching_values = (
-                        aggregated_metrics["matching_values_sum"]
-                        / aggregated_metrics["total_values_sum"]
-                        if aggregated_metrics["total_values_sum"]
-                        else 0
-                    )
-                    avg_total_values = (
-                        aggregated_metrics["total_values_sum"] / num_runs
-                        if num_runs
-                        else 0
-                    )  # Use num_runs
                     avg_similarity = (
                         aggregated_metrics["avg_similarity_sum"] / num_runs
                         if num_runs
@@ -555,14 +515,11 @@ def generate_results(
 
                     metrics_data[framework_name] = [
                         latency_p95,
-                        f"{sum(value['percent_successful'])}/{len(value['percent_successful'])}",
+                        f"{int(sum(value['percent_successful']))}/{len(value['percent_successful'])}",
                         f"{int(avg_exact_match_ratio * aggregated_metrics['total_calls'])}/{aggregated_metrics['total_calls']}",
                         f"{int(avg_matching_args)}/{int(avg_total_args)}",
                         f"{int(avg_total_args - avg_extra_args)}/{int(avg_total_args)}",
                         f"{int(avg_matching_args)}/{int(avg_total_args)}",
-                        f"{int(avg_matching_values)}/{int(avg_total_values)}"
-                        if avg_total_values > 0
-                        else "0/0",
                         avg_similarity,
                         avg_weighted_score,
                     ]
@@ -576,7 +533,6 @@ def generate_results(
                         "Param Coverage",
                         "Param Precision",
                         "Param Recall",
-                        "Value Match",
                         "Value Similarity",
                         "Overall Quality",
                     ],

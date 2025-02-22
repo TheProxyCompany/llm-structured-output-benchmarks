@@ -8,7 +8,8 @@ from lmformatenforcer.integrations.transformers import (
 import torch
 from transformers import pipeline
 
-from frameworks.base import BaseFramework, experiment
+from src.frameworks.base import BaseFramework
+from src.experiment import experiment
 
 
 class LMFormatEnforcerFramework(BaseFramework):
@@ -16,7 +17,6 @@ class LMFormatEnforcerFramework(BaseFramework):
         super().__init__(*args, **kwargs)
         self.parser = JsonSchemaParser(self.response_model.schema())
         max_length = kwargs.get("max_length", 4096)
-        torch.mps.empty_cache()
         if self.llm_model_family == "transformers":
             self.hf_pipeline = pipeline(
                 "text-generation",
@@ -47,6 +47,7 @@ class LMFormatEnforcerFramework(BaseFramework):
     ) -> tuple[list[Any], float, dict, list[list[float]]]:
         @experiment(n_runs=n_runs, expected_response=expected_response, task=task)
         def run_experiment(inputs):
+            torch.mps.empty_cache()
             prompt = inputs.get("prompt")
             if not prompt:
                 prompt = self.prompt.format(

@@ -1,8 +1,8 @@
 import dataclasses
 from enum import Enum
-from typing import Any, Optional, Type, Annotated
+from typing import Any
 
-from pydantic import BaseModel, create_model, field_validator, StringConstraints
+from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
 
@@ -16,14 +16,6 @@ def multilabel_classification_model(multilabel_classes: list[str]):
         classes: list[MultilabelClasses]  # type: ignore
 
     return MultiLabelClassification
-
-
-def ner_model(ner_entities):
-    fields = {name: (Optional[list[str]], None) for name in ner_entities}
-
-    NER = create_model("NER", **fields)  # type: ignore
-
-    return NER
 
 
 def synthetic_data_generation_model():
@@ -41,7 +33,7 @@ def synthetic_data_generation_model():
 
 
 def pydantic_to_dataclass(
-    klass: Type[BaseModel],
+    klass: type[BaseModel],
     classname: str | None = None,
 ) -> Any:
     """
