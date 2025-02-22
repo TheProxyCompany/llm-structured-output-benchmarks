@@ -51,7 +51,8 @@ def experiment(
             responses, latencies = [], []
             for _ in tqdm(range(n_runs), leave=False):
                 try:
-                    torch.mps.empty_cache() 
+                    if torch.backends.mps.is_available():
+                        torch.mps.empty_cache()
                     start_time = time.time()
                     response = func(*args, **kwargs)
                     end_time = time.time()

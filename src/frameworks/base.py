@@ -53,7 +53,8 @@ class BaseFramework(ABC):
         self.device = kwargs.get("device", "cpu")
         source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
 
-        torch.mps.empty_cache()
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
 
         # Load the data
         if source_data_pickle_path:
