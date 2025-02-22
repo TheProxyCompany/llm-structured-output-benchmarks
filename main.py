@@ -10,7 +10,9 @@ from tqdm import tqdm
 
 from src.frameworks import factory
 from src import save_results, print_benchmark_results
+
 app = typer.Typer()
+
 
 @app.command()
 def run_benchmark(config_path: str = "config.yaml"):
@@ -32,7 +34,6 @@ def run_benchmark(config_path: str = "config.yaml"):
 
     # Run benchmarks for each framework
     for config_key, config_values in configs.items():
-
         for config in config_values:
             results = []
             task = config["task"]
@@ -41,10 +42,7 @@ def run_benchmark(config_path: str = "config.yaml"):
             # Initialize framework
             try:
                 framework_instance = factory(
-                    config_key,
-                    task=task,
-                    device=device,
-                    **config["init_kwargs"]
+                    config_key, task=task, device=device, **config["init_kwargs"]
                 )
                 logger.info(f"Initialized {type(framework_instance).__name__}")
 
@@ -74,6 +72,7 @@ def run_benchmark(config_path: str = "config.yaml"):
 
             # Save results after each framework evaluation
             save_results(results, task, config_key)
+
 
 @app.command()
 def generate_results(
@@ -127,7 +126,9 @@ def generate_results(
             if current_task == "multilabel_classification":
                 print_benchmark_results(
                     "Multilabel Classification",
-                    num_samples=len(results["Multilabel Classification"]["predictions"]),
+                    num_samples=len(
+                        results["Multilabel Classification"]["predictions"]
+                    ),
                     num_runs=len(results["Multilabel Classification"]["latencies"]),
                     df=results,
                 )
@@ -135,7 +136,9 @@ def generate_results(
             elif current_task == "synthetic_data_generation":
                 print_benchmark_results(
                     "Synthetic Data Generation",
-                    num_samples=len(results["Synthetic Data Generation"]["predictions"]),
+                    num_samples=len(
+                        results["Synthetic Data Generation"]["predictions"]
+                    ),
                     num_runs=len(results["Synthetic Data Generation"]["latencies"]),
                     df=results,
                 )

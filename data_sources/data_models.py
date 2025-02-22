@@ -5,18 +5,6 @@ from typing import Any
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
-class MultiLabelClassification(BaseModel):
-    class MultilabelClasses(str, Enum):
-        def _generate_next_value_(name, start, count, last_values):
-            return name
-
-    classes: list[MultilabelClasses]
-
-    def __init__(self, classes: list[str]):
-        self.classes = [self.MultilabelClasses(c) for c in classes]
-        super().__init__(classes=self.classes)
-
-
 class UserAddress(BaseModel):
     street: str
     city: str
