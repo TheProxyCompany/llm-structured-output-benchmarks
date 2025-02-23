@@ -147,32 +147,27 @@ def calculate_function_call_metrics(
 
 def calculate_synthetic_data_generation_metrics(df: pd.DataFrame) -> FrameworkMetrics:
     """Calculate metrics for synthetic data generation."""
-    num_samples: int = len(df.columns)
     num_runs: int = cast(int, df.loc["n_runs", 0])
 
     metrics = {}
     completion_rates = []
-    average_latencies = []
     sample_scores = []
-    for sample_idx in range(num_samples):
-        # Safely extract responses and latencies
-        responses_val = df.loc["responses", sample_idx]
-        latencies_val = df.loc["latencies", sample_idx]
-        assert isinstance(responses_val, list)
-        assert isinstance(latencies_val, list)
+    # Safely extract responses and latencies
+    responses_val = df.loc["responses", 0]
+    latencies_val = df.loc["latencies", 0]
+    assert isinstance(responses_val, list)
+    assert isinstance(latencies_val, list)
 
-        latencies = [float(latency) for latency in latencies_val]
-        completion_rate = len(responses_val) / num_runs
-        completion_rates.append(completion_rate)
-        average_latencies.append(np.mean(latencies))
+    latencies = [float(latency) for latency in latencies_val]
+    completion_rate = len(responses_val) / num_runs
+    completion_rates.append(completion_rate)
 
-        users = [User.model_validate(response) for response in responses_val]
+    users = [User.model_validate(response) for response in responses_val]
+    sample_scores.append(User.calculate_diversity_score(users))
 
-        sample_scores.append(User.calculate_diversity_score(users))
-
-    metrics["p50_latency"] = np.percentile(average_latencies, 50)
-    metrics["p95_latency"] = np.percentile(average_latencies, 95)
     metrics["error_rate"] = 1 - np.mean(completion_rates)
+    metrics["p50_latency"] = np.percentile(latencies, 50)
+    metrics["p95_latency"] = np.percentile(latencies, 95)
     metrics["diversity_score"] = np.mean(sample_scores)
 
     return FrameworkMetrics(metrics, -1, num_runs)
