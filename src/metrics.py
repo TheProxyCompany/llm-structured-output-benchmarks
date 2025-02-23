@@ -74,10 +74,10 @@ def compare_framework_results(
     # Update metric descriptions to remove redundant units
     metric_descriptions = {
         "error_rate": "Error Rate",
-        "p50_latency": "Average Latency",
-        "p95_latency": "95th Percentile Latency",
-        "average_name_match": "Average Name Match",
-        "average_args_match": "Average Args Match",
+        "p50_latency": "Average Generation Time",
+        "p95_latency": "95th Percentile Generation Time",
+        "average_name_match": "Average Correct Function Name",
+        "average_args_match": "Average Correct Function Args",
         "diversity_score": "Diversity Score",
     }
 
