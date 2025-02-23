@@ -1,6 +1,6 @@
-# ################
-# # LOCAL MODELS #
-# ################
+################
+# LOCAL MODELS #
+################
 
 OutlinesFramework:
   - task: "synthetic_data_generation"

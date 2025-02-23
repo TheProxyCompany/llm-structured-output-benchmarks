@@ -104,4 +104,4 @@ class BaseFramework(ABC):
             logger.error(f"Error during framework evaluation: {str(e)}")
             logger.exception(e)
 
-        return result
+        return result or ExperimentResult([], [], None, n_runs)
