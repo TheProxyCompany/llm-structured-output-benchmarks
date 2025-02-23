@@ -33,9 +33,9 @@ def print_benchmark_results(
         header = (
             f" {task_name} Benchmark Results ({num_samples} Samples x {num_runs} Runs) "
         )
-    print("\n" + "=" * 80)
-    print(header.center(80))
-    print("=" * 80 + "\n")
+    print("\n" + "=" * 120)
+    print(header.center(120))
+    print("=" * 120 + "\n")
 
     # Format and print the DataFrame
     # Right-align all numeric columns
@@ -46,13 +46,13 @@ def print_benchmark_results(
     # Print with consistent spacing
     print(
         df.to_string(
-            justify="right",
+            justify="center",
             col_space=15,
             index_names=False,
             float_format=lambda x: f"{x:>8.3f}",  # Always returns string
         )
     )
-    print("\n" + "-" * 80 + "\n")
+    print("\n" + "-" * 120 + "\n")
 
 
 def save_results(results: list[ExperimentResult], task: str, framework_name: str):

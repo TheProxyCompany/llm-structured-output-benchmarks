@@ -108,6 +108,11 @@ def generate_results(
         "function_calling",
     ]
 
+    task_mapping = {
+        "synthetic_data_generation": "Synthetic Data Generation",
+        "function_calling": "Function Calling",
+    }
+
     if task and task not in allowed_tasks:
         raise ValueError(f"Invalid task: {task}. Allowed values are {allowed_tasks}")
 
@@ -142,7 +147,10 @@ def generate_results(
                 results, current_task
             )
             print_benchmark_results(
-                current_task, num_samples, num_runs, comparison_df
+                task_mapping[current_task],
+                num_samples,
+                num_runs,
+                comparison_df,
             )
         except Exception as e:
             logger.error(f"Error calculating metrics: {str(e)}")

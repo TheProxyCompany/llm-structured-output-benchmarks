@@ -134,11 +134,11 @@ def calculate_function_call_metrics(
         average_args_matches.append(
             np.mean([args_match for _, args_match in numerical_scores])
         )
+    # Consistency metrics
+    metrics["error_rate"] = 1 - np.mean(completion_rates)
     # Latency metrics
     metrics["p50_latency"] = np.percentile(average_latencies, 50)
     metrics["p95_latency"] = np.percentile(average_latencies, 95)
-    # Consistency metrics
-    metrics["error_rate"] = 1 - np.mean(completion_rates)
     metrics["average_name_match"] = np.mean(average_name_matches)
     metrics["average_args_match"] = np.mean(average_args_matches)
 
