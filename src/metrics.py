@@ -6,13 +6,17 @@ from loguru import logger
 
 from data_sources.data_models import FunctionCall, User
 
+
 @dataclass
 class FrameworkMetrics:
     metrics: dict[str, float]
     num_samples: int
     num_runs: int
 
-def compare_framework_results(results: dict[str, pd.DataFrame], task: str) -> tuple[pd.DataFrame, int, int]:
+
+def compare_framework_results(
+    results: dict[str, pd.DataFrame], task: str
+) -> tuple[pd.DataFrame, int, int]:
     """Compare metrics across different frameworks and return complete analysis package.
 
     Args:
@@ -33,7 +37,9 @@ def compare_framework_results(results: dict[str, pd.DataFrame], task: str) -> tu
             if task == "function_calling":
                 framework_metrics = calculate_function_call_metrics(framework_results)
             elif task == "synthetic_data_generation":
-                framework_metrics = calculate_synthetic_data_generation_metrics(framework_results)
+                framework_metrics = calculate_synthetic_data_generation_metrics(
+                    framework_results
+                )
             else:
                 raise ValueError(f"Metrics not implemented for task: {task}")
             comparison[framework_name] = framework_metrics.metrics
@@ -43,25 +49,27 @@ def compare_framework_results(results: dict[str, pd.DataFrame], task: str) -> tu
             logger.error(f"Error calculating metrics for {framework_name}: {e}")
             continue
 
-    # Create comparison DataFrame with frameworks as columns
-    comparison_df = pd.DataFrame.from_dict(comparison)
+    # Create comparison DataFrame with frameworks as columns, specifying object dtype
+    comparison_df = pd.DataFrame.from_dict(comparison, dtype=object)
 
     # Define value formatting rules
     value_formatters = {
         # Percentage metrics (0.95 -> 95.0%)
-        'error_rate': lambda x: f"{x * 100:.1f}%",
-        'average_name_match': lambda x: f"{x * 100:.1f}%",
-        'average_args_match': lambda x: f"{x * 100:.1f}%",
-        'diversity_score': lambda x: f"{x * 100:.1f}%",
+        "error_rate": lambda x: f"{x * 100:.1f}%",
+        "average_name_match": lambda x: f"{x * 100:.1f}%",
+        "average_args_match": lambda x: f"{x * 100:.1f}%",
+        "diversity_score": lambda x: f"{x * 100:.1f}%",
         # Latency metrics in seconds with 3 decimal places
-        'p50_latency': lambda x: f"{x:.3f}s",
-        'p95_latency': lambda x: f"{x:.3f}s",
+        "p50_latency": lambda x: f"{x:.3f}s",
+        "p95_latency": lambda x: f"{x:.3f}s",
     }
 
     # Apply formatting to each metric row
     for metric_key in comparison_df.index:
         if metric_key in value_formatters:
-            comparison_df.loc[metric_key] = comparison_df.loc[metric_key].apply(value_formatters[metric_key])
+            comparison_df.loc[metric_key] = comparison_df.loc[metric_key].apply(
+                value_formatters[metric_key]
+            )
 
     # Update metric descriptions to remove redundant units
     metric_descriptions = {
@@ -130,7 +138,7 @@ def calculate_function_call_metrics(
     metrics["p50_latency"] = np.percentile(average_latencies, 50)
     metrics["p95_latency"] = np.percentile(average_latencies, 95)
     # Consistency metrics
-    metrics["error_rate"] = (1 - np.mean(completion_rates))
+    metrics["error_rate"] = 1 - np.mean(completion_rates)
     metrics["average_name_match"] = np.mean(average_name_matches)
     metrics["average_args_match"] = np.mean(average_args_matches)
 
@@ -164,7 +172,7 @@ def calculate_synthetic_data_generation_metrics(df: pd.DataFrame) -> FrameworkMe
 
     metrics["p50_latency"] = np.percentile(average_latencies, 50)
     metrics["p95_latency"] = np.percentile(average_latencies, 95)
-    metrics["error_rate"] = (1 - np.mean(completion_rates))
+    metrics["error_rate"] = 1 - np.mean(completion_rates)
     metrics["diversity_score"] = np.mean(sample_scores)
 
     return FrameworkMetrics(metrics, -1, num_runs)
