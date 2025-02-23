@@ -129,10 +129,10 @@ def calculate_function_call_metrics(
             for generated_response in responses_val
         ]
         average_name_matches.append(
-            np.mean([name_match for name_match, _, _ in numerical_scores])
+            np.mean([name_match for name_match, _ in numerical_scores])
         )
         average_args_matches.append(
-            np.mean([args_match for _, args_match, _ in numerical_scores])
+            np.mean([args_match for _, args_match in numerical_scores])
         )
     # Latency metrics
     metrics["p50_latency"] = np.percentile(average_latencies, 50)

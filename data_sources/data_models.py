@@ -57,9 +57,12 @@ class FunctionCall(BaseModel):
     def compare(
         expected: "FunctionCall",
         generated: "FunctionCall",
-    ) -> tuple[float, float, float]:
+    ) -> tuple[float, float]:
         # Score between 0.0 and 1.0
         name_match = float(expected.name == generated.name)
+
+        if not name_match:
+            return 0.0, 0.0
 
         # Compare arguments presence
         expected_keys = set(expected.arguments.keys())
@@ -73,17 +76,7 @@ class FunctionCall(BaseModel):
             else 1.0
         )
 
-        # Argument correctness score (for present arguments)
-        args_correctness = 0.0
-        if common_keys:
-            correct_args = sum(
-                1
-                for key in common_keys
-                if expected.arguments[key] == generated.arguments[key]
-            )
-            args_correctness = correct_args / len(common_keys)
-
-        return name_match, args_presence, args_correctness
+        return name_match, args_presence
 
 
 def pydantic_to_dataclass(
