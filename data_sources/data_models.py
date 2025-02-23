@@ -1,5 +1,4 @@
 import dataclasses
-from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
@@ -7,15 +6,25 @@ from pydantic_core import PydanticUndefined
 
 
 class UserAddress(BaseModel):
+    """A model representing a user's physical address."""
+
     street: str
+    """The street name and number"""
     city: str
+    """The city name"""
     country: str
+    """The country name"""
 
 
 class User(BaseModel):
+    """A model representing a user with their basic information and address."""
+
     name: str
+    """The user's full name"""
     age: int
+    """The user's age in years"""
     address: UserAddress
+    """The user's physical address details"""
 
     @staticmethod
     def calculate_diversity_score(users: list["User"]) -> float:

@@ -43,7 +43,7 @@ class PSEFramework(BaseFramework):
 
         self.model.engine = StructuringEngine(self.tokenizer, multi_token_sampling=True)
         if not self.task == "function_calling":
-            self.model.engine.configure(self.response_model.schema())
+            self.model.engine.configure(self.response_model)
 
     def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
 
