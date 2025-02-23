@@ -46,19 +46,35 @@ def compare_framework_results(results: dict[str, pd.DataFrame], task: str) -> tu
     # Create comparison DataFrame with frameworks as columns
     comparison_df = pd.DataFrame.from_dict(comparison)
 
-    # Add metric descriptions as index names
+    # Define value formatting rules
+    value_formatters = {
+        # Percentage metrics (0.95 -> 95.0%)
+        'error_rate': lambda x: f"{x * 100:.1f}%",
+        'average_name_match': lambda x: f"{x * 100:.1f}%",
+        'average_args_match': lambda x: f"{x * 100:.1f}%",
+        'diversity_score': lambda x: f"{x * 100:.1f}%",
+        # Latency metrics in seconds with 3 decimal places
+        'p50_latency': lambda x: f"{x:.3f}s",
+        'p95_latency': lambda x: f"{x:.3f}s",
+    }
+
+    # Apply formatting to each metric row
+    for metric_key in comparison_df.index:
+        if metric_key in value_formatters:
+            comparison_df.loc[metric_key] = comparison_df.loc[metric_key].apply(value_formatters[metric_key])
+
+    # Update metric descriptions to remove redundant units
     metric_descriptions = {
-        "completion_rate": "Valid Schema Rate",
-        "p50_latency": "Average Latency (s)",
-        "p95_latency": "95th Percentile Latency (s)",
+        "error_rate": "Error Rate",
+        "p50_latency": "Average Latency",
+        "p95_latency": "95th Percentile Latency",
         "average_name_match": "Average Name Match",
         "average_args_match": "Average Args Match",
-        "average_args_correctness": "Average Args Correctness",
+        "diversity_score": "Diversity Score",
     }
-    # Use a list comprehension with a default value for robustness.
-    index_names = [
-        metric_descriptions.get(i, i) for i in comparison_df.index
-    ]
+
+    # Create descriptive index names
+    index_names = [metric_descriptions.get(i, i) for i in comparison_df.index]
     comparison_df.index = pd.Index(index_names, name="Metric")
 
     return comparison_df, num_samples, num_runs
@@ -81,7 +97,6 @@ def calculate_function_call_metrics(
     completion_rates = []
     average_name_matches = []
     average_args_matches = []
-    average_args_correctness = []
 
     for sample_idx in range(num_samples):
         # Safely extract responses and latencies
@@ -111,17 +126,13 @@ def calculate_function_call_metrics(
         average_args_matches.append(
             np.mean([args_match for _, args_match, _ in numerical_scores])
         )
-        average_args_correctness.append(
-            np.mean([args_correctness for _, _, args_correctness in numerical_scores])
-        )
     # Latency metrics
     metrics["p50_latency"] = np.percentile(average_latencies, 50)
     metrics["p95_latency"] = np.percentile(average_latencies, 95)
     # Consistency metrics
-    metrics["completion_rate"] = np.mean(completion_rates) * 100
-    metrics["average_name_match"] = np.mean(average_name_matches) * 100
-    metrics["average_args_match"] = np.mean(average_args_matches) * 100
-    metrics["average_args_correctness"] = np.mean(average_args_correctness) * 100
+    metrics["error_rate"] = (1 - np.mean(completion_rates))
+    metrics["average_name_match"] = np.mean(average_name_matches)
+    metrics["average_args_match"] = np.mean(average_args_matches)
 
     return FrameworkMetrics(metrics, num_samples, num_runs)
 
@@ -151,8 +162,9 @@ def calculate_synthetic_data_generation_metrics(df: pd.DataFrame) -> FrameworkMe
 
         sample_scores.append(User.calculate_diversity_score(users))
 
-    metrics["completion_rate"] = np.mean(completion_rates) * 100
-    metrics["average_latencies"] = np.mean(average_latencies)
-    metrics["sample_scores"] = np.mean(sample_scores) * 100
+    metrics["p50_latency"] = np.percentile(average_latencies, 50)
+    metrics["p95_latency"] = np.percentile(average_latencies, 95)
+    metrics["error_rate"] = (1 - np.mean(completion_rates))
+    metrics["diversity_score"] = np.mean(sample_scores)
 
     return FrameworkMetrics(metrics, -1, num_runs)

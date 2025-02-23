@@ -17,12 +17,25 @@ app = typer.Typer()
 
 
 @app.command()
-def run_benchmark(config_path: str = "config.yaml"):
+def run_benchmark(
+    config_path: str = "config.yaml",
+    task: str = "",
+):
     """Run benchmarks for all frameworks specified in the config file.
 
     Args:
         config_path: Path to YAML config file
     """
+    allowed_tasks = [
+        "synthetic_data_generation",
+        "function_calling",
+    ]
+
+    if task and task not in allowed_tasks:
+        raise ValueError(f"Invalid task: {task}. Allowed values are {allowed_tasks}")
+
+    tasks_to_run = [task] if task else allowed_tasks
+
     device = "cuda" if torch.cuda.is_available() else "auto"
     logger.info(f"Using device: {device} for local models")
 
@@ -40,6 +53,9 @@ def run_benchmark(config_path: str = "config.yaml"):
             results = []
             task = config["task"]
             n_runs = config["n_runs"]
+
+            if task not in tasks_to_run:
+                continue
 
             # Initialize framework
             try:
