@@ -25,9 +25,14 @@ def print_benchmark_results(
     pd.set_option("display.max_colwidth", None)
     pd.set_option("display.precision", 3)
     # Create a pretty header
-    header = (
-        f" {task_name} Benchmark Results ({num_samples} Samples x {num_runs} Runs) "
-    )
+    if num_samples == -1:
+        header = (
+            f" {task_name} Benchmark Results ({num_runs} Samples) "
+        )
+    else:
+        header = (
+            f" {task_name} Benchmark Results ({num_samples} Samples x {num_runs} Runs) "
+        )
     print("\n" + "=" * 80)
     print(header.center(80))
     print("=" * 80 + "\n")

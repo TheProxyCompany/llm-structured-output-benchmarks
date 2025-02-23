@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
+
 class UserAddress(BaseModel):
     street: str
     city: str
@@ -16,9 +17,64 @@ class User(BaseModel):
     age: int
     address: UserAddress
 
+    @staticmethod
+    def calculate_diversity_score(users: list["User"]) -> float:
+        """
+        Calculate a diversity score for a list of users (0.0 to 1.0).
+        Considers age distribution, name uniqueness, and geographic diversity.
+        """
+        if not users:
+            return 0.0
+
+        # Name uniqueness (ratio of unique names)
+        unique_names = len(set(user.name for user in users))
+        name_diversity = unique_names / len(users)
+
+        # Geographic diversity (unique locations)
+        unique_locations = len(
+            set((user.address.city, user.address.country) for user in users)
+        )
+        location_diversity = unique_locations / len(users)
+
+        # Combined score (equal weights)
+        return (name_diversity + location_diversity) / 2.0
+
+
 class FunctionCall(BaseModel):
     name: str
     arguments: dict[str, Any]
+
+    @staticmethod
+    def compare(
+        expected: "FunctionCall",
+        generated: "FunctionCall",
+    ) -> tuple[float, float, float]:
+        # Score between 0.0 and 1.0
+        name_match = float(expected.name == generated.name)
+
+        # Compare arguments presence
+        expected_keys = set(expected.arguments.keys())
+        generated_keys = set(generated.arguments.keys())
+        common_keys = expected_keys & generated_keys
+
+        # Argument presence score - handle both empty cases
+        args_presence = (
+            len(common_keys) / max(len(expected_keys), len(generated_keys))
+            if (expected_keys or generated_keys)
+            else 1.0
+        )
+
+        # Argument correctness score (for present arguments)
+        args_correctness = 0.0
+        if common_keys:
+            correct_args = sum(
+                1
+                for key in common_keys
+                if expected.arguments[key] == generated.arguments[key]
+            )
+            args_correctness = correct_args / len(common_keys)
+
+        return name_match, args_presence, args_correctness
 
 
 def pydantic_to_dataclass(

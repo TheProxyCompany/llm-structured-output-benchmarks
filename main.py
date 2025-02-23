@@ -9,7 +9,9 @@ from loguru import logger
 from tqdm import tqdm
 
 from src.frameworks import factory
-from src import save_results, print_benchmark_results
+from src import save_results  # , print_benchmark_results
+from src.metrics import compare_framework_results
+from src import print_benchmark_results
 
 app = typer.Typer()
 
@@ -86,7 +88,6 @@ def generate_results(
         task: Type of task to analyze. If not specified, will show results for all tasks.
     """
     allowed_tasks = [
-        "multilabel_classification",
         "synthetic_data_generation",
         "function_calling",
     ]
@@ -106,10 +107,11 @@ def generate_results(
             if os.path.exists(current_results_path):
                 for file_name in os.listdir(current_results_path):
                     if file_name.endswith(".pkl"):
+                        framework_name = file_name.split(".pkl")[0]
                         file_path = os.path.join(current_results_path, file_name)
                         with open(file_path, "rb") as file:
                             framework_results = pickle.load(file)
-                            results.update(framework_results)
+                            results.update({framework_name: framework_results})
             else:
                 logger.warning(f"No results found for task: {current_task}")
                 continue
@@ -120,7 +122,12 @@ def generate_results(
             continue
 
         try:
-            pass
+            comparison_df, num_samples, num_runs = compare_framework_results(
+                results, current_task
+            )
+            print_benchmark_results(
+                current_task, num_samples, num_runs, comparison_df
+            )
         except Exception as e:
             logger.error(f"Error calculating metrics: {str(e)}")
             logger.exception(e)

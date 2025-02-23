@@ -26,6 +26,7 @@ class LMFormatEnforcerFramework(BaseFramework):
                 top_k=10,
                 do_sample=True,
                 temperature=1.0,
+                truncation=True,
             )
             self.prefix_function = build_transformers_prefix_allowed_tokens_fn(
                 self.hf_pipeline.tokenizer,  # type: ignore
