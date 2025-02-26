@@ -7,26 +7,26 @@ Benchmark various Structured Output frameworks:
 
 This is a quick fork from the original [llm-structured-output-benchmarks](https://github.com/stephenleo/llm-structured-output-benchmarks) repository.
 
-## 🏆 Benchmark Results [2025-02-23]
+## 🏆 Benchmark Results [2025-02-26]
 
 ### Function Calling Results
 
 | Metric | PSEFramework | LMFormatEnforcerFramework | OutlinesFramework |
 |:------|:------------:|:-------------------------:|:-----------------:|
-| Error Rate | **0.0%** | 0.3% | **0.0%** |
-| Average Generation Time | **11.020s** | 12.956s | 17.670s |
-| 95th Percentile Generation Time | **14.985s** | 15.810s | 19.229s |
-| Average Correct Function Name | **82.2%** | 78.5% | 78.7% |
-| Average Correct Function Args | **77.9%** | 74.8% | 75.8% |
+| Error Rate | **0.0%** | 0.4% | **0.0%** |
+| Average Generation Time | **7.150s** | 10.328s | 16.298s |
+| 95th Percentile Generation Time | **8.768s** | 12.119s | 17.975s |
+| Average Correct Function Name | **82.3%** | 80.8% | 80.1% |
+| Average Correct Function Args | **78.0%** | 76.7% | 77.0% |
 
 ### Synthetic Data Generation Results
 
 | Metric | PSEFramework | LMFormatEnforcerFramework | OutlinesFramework |
 |:------|:------------:|:-------------------------:|:-----------------:|
-| Error Rate | **0.0%** | 5.0% | **0.0%** |
-| Average Generation Time | 8.788s | 4.425s | **3.584s** |
-| 95th Percentile Generation Time | 9.746s | 4.952s | **4.335s** |
-| Diversity Score | **87.5%** | 85.8% | 85.0% |
+| Error Rate | **0.0%** | 1.0% | **0.0%** |
+| Average Generation Time | 5.100s | 4.310s | **3.346s** |
+| 95th Percentile Generation Time | 5.784s | 4.753s | **4.084s** |
+| Diversity Score | **89.0%** | 87.9% | 88.0% |
 
 ## Run the benchmarks
 
