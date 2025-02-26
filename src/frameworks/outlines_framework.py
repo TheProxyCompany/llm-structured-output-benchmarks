@@ -4,7 +4,7 @@ import json
 from outlines.generate.json import json as outlines_json
 from outlines.models.transformers import transformers as outlines_transformers
 
-from outlines.samplers import MultinomialSampler
+from outlines.samplers import GreedySampler
 
 from src.frameworks.base import BaseFramework
 from src.experiment import experiment, ExperimentResult
@@ -26,11 +26,7 @@ class OutlinesFramework(BaseFramework):
                 self.outlines_model.model.config.eos_token_id[-1]
             )
 
-        self.sampler = MultinomialSampler(
-            top_k=10,
-            top_p=None,
-            temperature=0.0,
-        )
+        self.sampler = GreedySampler()
         self.outline_generator = outlines_json(
             self.outlines_model, self.response_model, sampler=self.sampler
         )

@@ -22,9 +22,9 @@ class LMFormatEnforcerFramework(BaseFramework):
                 model=self.llm_model,
                 device_map=self.device,
                 max_length=max_length,
+                temperature=None,
                 top_p=None,
-                do_sample=True,
-                temperature=0.0,
+                do_sample=False,
                 truncation=True,
             )
             self.prefix_function = build_transformers_prefix_allowed_tokens_fn(

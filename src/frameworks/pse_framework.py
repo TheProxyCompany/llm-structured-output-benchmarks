@@ -42,7 +42,7 @@ class PSEFramework(BaseFramework):
         if self.model.generation_config:
             self.model.generation_config.pad_token_id = self.model.config.eos_token_id[-1]
 
-        self.model.engine = StructuringEngine(self.tokenizer, multi_token_sampling=True)
+        self.model.engine = StructuringEngine(self.tokenizer)
         if not self.task == "function_calling":
             self.model.engine.configure(self.response_model)
 
@@ -58,7 +58,7 @@ class PSEFramework(BaseFramework):
                 )
             # Configure engine with schema
             if "schema" in inputs:
-                schema = inputs.get("schema")
+                schema = json.dumps(inputs.get("schema"))
                 self.model.engine.configure(schema)
             else:
                 self.model.engine.reset()
@@ -75,9 +75,9 @@ class PSEFramework(BaseFramework):
             output_ids = self.model.generate(
                 input_ids,
                 max_length=self.max_length,
+                temperature=None,
                 top_p=None,
-                do_sample=True,
-                temperature=0.0,
+                do_sample=False,
             )
             # Decode and parse response
             response_text = self.tokenizer.decode(output_ids[0][len(input_ids[0]) :])

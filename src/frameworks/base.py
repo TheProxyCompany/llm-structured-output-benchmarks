@@ -117,6 +117,7 @@ class BaseFramework(ABC):
         except Exception as e:
             logger.error(f"Error during framework evaluation: {str(e)}")
             logger.exception(e)
+            breakpoint()
             raise e
 
         return result
