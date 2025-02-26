@@ -1,6 +1,6 @@
-################
-# LOCAL MODELS #
-################
+# ################
+# # LOCAL MODELS #
+# ################
 
 OutlinesFramework:
   - task: "synthetic_data_generation"
@@ -17,7 +17,7 @@ OutlinesFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
+      sample_rows: 100
 
 LMFormatEnforcerFramework:
   - task: "synthetic_data_generation"
@@ -34,7 +34,7 @@ LMFormatEnforcerFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
+      sample_rows: 100
 
 PSEFramework:
   - task: "synthetic_data_generation"
@@ -51,4 +51,4 @@ PSEFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
+      sample_rows: 100
