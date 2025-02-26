@@ -9,7 +9,7 @@ from src.frameworks.base import BaseFramework
 from src.experiment import experiment, ExperimentResult
 
 from transformers import LlamaForCausalLM, AutoTokenizer
-from pse.engine.structuring_engine import StructuringEngine
+from pse.structuring_engine import StructuringEngine
 from pse.util.torch_mixin import PSETorchMixin
 
 logger = logging.getLogger(__name__)
