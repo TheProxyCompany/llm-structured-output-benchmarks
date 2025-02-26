@@ -11,6 +11,7 @@ from data_sources.data_models import (
 )
 from src.experiment import ExperimentResult
 
+
 class BaseFramework(ABC):
     task: str
     prompt: str
@@ -31,6 +32,17 @@ class BaseFramework(ABC):
         source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
         self.source_data = None
 
+        # Set random seed for reproducibility
+        seed = kwargs.get("seed", 11)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        import numpy as np
+        import random
+
+        np.random.seed(seed)
+        random.seed(seed)
+
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
 
@@ -39,7 +51,10 @@ class BaseFramework(ABC):
             self.source_data = pd.read_pickle(source_data_pickle_path)
             sample_rows = kwargs.get("sample_rows", 0)
             if sample_rows:
-                self.source_data = self.source_data.sample(sample_rows)
+                # Use fixed random state for reproducible sampling
+                self.source_data = self.source_data.sample(
+                    sample_rows, random_state=seed
+                )
                 self.source_data = self.source_data.reset_index(drop=True)
             logger.info(f"Loaded source data from {source_data_pickle_path}")
 
@@ -52,14 +67,13 @@ class BaseFramework(ABC):
         logger.info(f"Response model is {self.response_model}")
 
     @abstractmethod
-    def run(self, n_runs: int, expected_response: Any, *args, **kwargs) -> ExperimentResult:
+    def run(
+        self, n_runs: int, expected_response: Any, *args, **kwargs
+    ) -> ExperimentResult:
         pass
 
     def run_experiment(
-        self,
-        task: str,
-        n_runs: int,
-        row: Any | None = None
+        self, task: str, n_runs: int, row: Any | None = None
     ) -> ExperimentResult:
         """
         Args:
