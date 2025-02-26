@@ -84,11 +84,7 @@ class BaseFramework(ABC):
         """
 
         try:
-            if not row:
-                result = self.run(n_runs=n_runs, expected_response=None)
-                return result
-
-            if task == "function_calling":
+            if task == "function_calling" and row:
                 # Handle function calling data format
                 tools = json.loads(row.tools)
                 tool_schemas = [
@@ -115,8 +111,12 @@ class BaseFramework(ABC):
                     expected_response=expected,
                     inputs=inputs,
                 )
+            else:
+                result = self.run(n_runs=n_runs, expected_response=None)
+
         except Exception as e:
             logger.error(f"Error during framework evaluation: {str(e)}")
             logger.exception(e)
+            raise e
 
-        return result or ExperimentResult([], [], None, n_runs)
+        return result

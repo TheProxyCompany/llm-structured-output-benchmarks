@@ -29,7 +29,7 @@ class OutlinesFramework(BaseFramework):
         self.sampler = MultinomialSampler(
             top_k=10,
             top_p=None,
-            temperature=1.0,
+            temperature=0.0,
         )
         self.outline_generator = outlines_json(
             self.outlines_model, self.response_model, sampler=self.sampler

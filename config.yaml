@@ -10,17 +10,15 @@ OutlinesFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      seed: 11
 
   - task: "function_calling"
-    n_runs: 2
+    n_runs: 5
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
-      seed: 11
+      sample_rows: 5
 
 LMFormatEnforcerFramework:
   - task: "synthetic_data_generation"
@@ -30,17 +28,15 @@ LMFormatEnforcerFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      seed: 11
 
   - task: "function_calling"
-    n_runs: 10
+    n_runs: 5
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
-      seed: 11
+      sample_rows: 5
 
 PSEFramework:
   - task: "synthetic_data_generation"
@@ -50,14 +46,12 @@ PSEFramework:
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      seed: 11
 
   - task: "function_calling"
-    n_runs: 10
+    n_runs: 5
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 10
-      seed: 11
+      sample_rows: 5

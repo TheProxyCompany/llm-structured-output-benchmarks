@@ -1,6 +1,7 @@
 import os
 import pickle
 
+import numpy as np
 import pandas as pd
 import torch
 import typer
@@ -47,12 +48,15 @@ def run_benchmark(
         logger.error(f"Failed to load config from {config_path}: {str(e)}")
         raise typer.Exit(1)
 
+    global_seed = np.random.randint(0, 2**32 - 1)
+    logger.info(f"Global seed: {global_seed}")
     # Run benchmarks for each framework
     for config_key, config_values in configs.items():
         for config in config_values:
             results = []
             task = config["task"]
             n_runs = config["n_runs"]
+            config["init_kwargs"]["seed"] = global_seed
 
             if task not in tasks_to_run:
                 continue
