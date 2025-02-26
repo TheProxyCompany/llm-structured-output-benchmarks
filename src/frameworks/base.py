@@ -53,7 +53,8 @@ class BaseFramework(ABC):
             if sample_rows:
                 # Use fixed random state for reproducible sampling
                 self.source_data = self.source_data.sample(
-                    sample_rows, random_state=seed
+                    sample_rows,
+                    random_state=seed,
                 )
                 self.source_data = self.source_data.reset_index(drop=True)
             logger.info(f"Loaded source data from {source_data_pickle_path}")
