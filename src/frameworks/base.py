@@ -29,7 +29,7 @@ class BaseFramework(ABC):
         self.llm_model = kwargs.get("llm_model", "gpt-4o-mini")
         self.llm_model_family = kwargs.get("llm_model_family", "openai")
         self.device = kwargs.get("device", "cpu")
-        source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
+        self.source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
         self.source_data = None
 
         # Set random seed for reproducibility
@@ -45,19 +45,6 @@ class BaseFramework(ABC):
 
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
-
-        # Load the data
-        if source_data_pickle_path:
-            self.source_data = pd.read_pickle(source_data_pickle_path)
-            sample_rows = kwargs.get("sample_rows", 0)
-            if sample_rows:
-                # Use fixed random state for reproducible sampling
-                self.source_data = self.source_data.sample(
-                    sample_rows,
-                    random_state=seed,
-                )
-                self.source_data = self.source_data.reset_index(drop=True)
-            logger.info(f"Loaded source data from {source_data_pickle_path}")
 
         # Create the response model
         if self.task == "synthetic_data_generation":
@@ -121,3 +108,14 @@ class BaseFramework(ABC):
             raise e
 
         return result
+
+    def set_source_data(self, num_rows: int, seed: int) -> None:
+        if self.source_data_pickle_path:
+            self.source_data = pd.read_pickle(self.source_data_pickle_path)
+            if num_rows:
+                # Use fixed random state for reproducible sampling
+                self.source_data = self.source_data.sample(
+                    num_rows,
+                    random_state=seed,
+                )
+                self.source_data = self.source_data.reset_index(drop=True)

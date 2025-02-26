@@ -22,6 +22,7 @@ class OutlinesFramework(BaseFramework):
             self.outlines_model.model.config.eos_token_id[-1]
         )
         if self.outlines_model.model.generation_config:
+            self.outlines_model.model.generation_config.temperature = None
             self.outlines_model.model.generation_config.pad_token_id = (
                 self.outlines_model.model.config.eos_token_id[-1]
             )

@@ -12,13 +12,13 @@ OutlinesFramework:
       max_length: 4096
 
   - task: "function_calling"
-    n_runs: 5
+    n_runs: 1
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 5
+      # sample_rows: 5
 
 LMFormatEnforcerFramework:
   - task: "synthetic_data_generation"
@@ -30,13 +30,13 @@ LMFormatEnforcerFramework:
       max_length: 4096
 
   - task: "function_calling"
-    n_runs: 5
+    n_runs: 1
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 5
+      # sample_rows: 5
 
 PSEFramework:
   - task: "synthetic_data_generation"
@@ -48,10 +48,10 @@ PSEFramework:
       max_length: 4096
 
   - task: "function_calling"
-    n_runs: 5
+    n_runs: 1
     init_kwargs:
       source_data_pickle_path: "data/function_calling.pkl"
       llm_model: "meta-llama/Llama-3.1-8b-Instruct"
       llm_model_family: "transformers"
       max_length: 4096
-      sample_rows: 5
+      # sample_rows: 5

@@ -4,6 +4,7 @@ import time
 from enum import Enum
 from typing import Any, Callable
 
+
 from pydantic import BaseModel
 import torch
 from tqdm import tqdm
