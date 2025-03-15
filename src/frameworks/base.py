@@ -30,19 +30,8 @@ class BaseFramework(ABC):
         self.llm_model_family = kwargs.get("llm_model_family", "openai")
         self.device = kwargs.get("device", "cpu")
         self.source_data_pickle_path = kwargs.get("source_data_pickle_path", "")
+        self.sample_rows = kwargs.get("sample_rows", 1)
         self.source_data = None
-
-        # Set random seed for reproducibility
-        seed = kwargs.get("seed", 11)
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(seed)
-        import numpy as np
-        import random
-
-        np.random.seed(seed)
-        random.seed(seed)
-
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
 
@@ -61,13 +50,18 @@ class BaseFramework(ABC):
         pass
 
     def run_experiment(
-        self, task: str, n_runs: int, row: Any | None = None
+        self,
+        task: str,
+        n_runs: int,
+        row: Any | None = None,
+        seeds: list[int] | None = None,
     ) -> ExperimentResult:
         """
         Args:
             task: Name of the task being performed
             n_runs: Number of runs per evaluation
             row: Optional row of test data (can be pandas Series or namedtuple)
+            seeds: Optional list of seeds to use for each run
         """
 
         try:
@@ -97,9 +91,14 @@ class BaseFramework(ABC):
                     n_runs=n_runs,
                     expected_response=expected,
                     inputs=inputs,
+                    seeds=seeds,  # Pass seeds to the run method
                 )
             else:
-                result = self.run(n_runs=n_runs, expected_response=None)
+                result = self.run(
+                    n_runs=n_runs,
+                    expected_response=None,
+                    seeds=seeds,  # Pass seeds to the run method
+                )
 
         except Exception as e:
             logger.error(f"Error during framework evaluation: {str(e)}")
@@ -109,7 +108,7 @@ class BaseFramework(ABC):
 
         return result
 
-    def set_source_data(self, num_rows: int, seed: int) -> None:
+    def set_source_data(self, num_rows: int | None = None, seed: int | None = None) -> None:
         if self.source_data_pickle_path:
             self.source_data = pd.read_pickle(self.source_data_pickle_path)
             if num_rows:

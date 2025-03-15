@@ -11,22 +11,13 @@ This is a quick fork from the original [llm-structured-output-benchmarks](https:
 
 ### Function Calling Results
 
-| Metric | PSEFramework | LMFormatEnforcerFramework | OutlinesFramework |
-|:------|:------------:|:-------------------------:|:-----------------:|
-| Error Rate | **0.0%** | 0.4% | **0.0%** |
-| Average Generation Time | **7.150s** | 10.328s | 16.298s |
-| 95th Percentile Generation Time | **8.768s** | 12.119s | 17.975s |
-| Average Correct Function Name | **82.3%** | 80.8% | 80.1% |
-| Average Correct Function Args | **78.0%** | 76.7% | 77.0% |
-
-### Synthetic Data Generation Results
-
-| Metric | PSEFramework | LMFormatEnforcerFramework | OutlinesFramework |
-|:------|:------------:|:-------------------------:|:-----------------:|
-| Error Rate | **0.0%** | 1.0% | **0.0%** |
-| Average Generation Time | 5.100s | 4.310s | **3.346s** |
-| 95th Percentile Generation Time | 5.784s | 4.753s | **4.084s** |
-| Diversity Score | **89.0%** | 87.9% | 88.0% |
+| Metric | LMFormatEnforcerFramework | PSEFramework | OutlinesFramework |
+|:------|:-------------------------:|:------------:|:-----------------:|
+| Error Rate | 0.0% | 0.0% | 0.0% |
+| Average Generation Time | 9.950s | **6.792s** | 15.835s |
+| 95th Percentile Generation Time | 11.308s | **8.278s** | 17.290s |
+| Average Correct Function Name | 83.0% | 83.0% | 82.0% |
+| Average Correct Function Args | 78.8% | 78.4% | 79.5% |
 
 ## Run the benchmarks
 
@@ -62,30 +53,15 @@ This is a quick fork from the original [llm-structured-output-benchmarks](https:
 
 - **Model**: meta-llama/Llama-3.1-8b-Instruct
 
-1. Synthetic Data Generation
-    - **Task**: Generate synthetic data similar according to a Pydantic data model schema.
-    - **Data**:
-        - Two level nested User details Pydantic schema.
-    - **Prompt**: `Generate a random person's information. The name must be chosen at random. Make it something you wouldn't normally choose.`
-    - **Experiment Details**:
-        - Run each sample through the framework `n_runs` times
-        - Results saved as pickled dataframes for analysis
-    - **Evaluation Metrics**:
-        - Error Rate: Percentage of failed completions (1 - completion rate)
-        - Average Generation Time: Median (P50) latency across all generations in seconds
-        - 95th Percentile Generation Time: P95 latency indicating worst-case performance
-        - Diversity Score: Composite metric (0-100%) measuring variety in generated data, calculated from:
-            - Name uniqueness ratio
-            - Geographic diversity (unique city/country combinations)
-
-2. Function Calling
+1. Function Calling
     - **Task**: Evaluate the framework's ability to parse natural language into structured function calls
     - **Data**:
         - Sourced from fireworks-ai/function-calling-eval-dataset-v0
         - Contains prompts, expected function call completions, and available tools/functions
     - **Prompt**: The prompt is a user message that includes the available tools & definitions, and the user's query.
     - **Experiment Details**:
-        - Run each sample through the framework `n_runs` times
+        - Run each sample through the framework `n_runs` times, using consistent random seeds across frameworks
+        - Each nth run uses the same random seed across all frameworks to ensure reproducible comparisons
         - Results saved as pickled dataframes for analysis
     - **Evaluation Metrics**:
         - Error Rate: Percentage of failed completions (1 - completion rate)

@@ -4,7 +4,7 @@ import json
 from outlines.generate.json import json as outlines_json
 from outlines.models.transformers import transformers as outlines_transformers
 
-from outlines.samplers import GreedySampler
+from outlines.samplers import GreedySampler, MultinomialSampler
 
 from src.frameworks.base import BaseFramework
 from src.experiment import experiment, ExperimentResult
@@ -14,6 +14,9 @@ class OutlinesFramework(BaseFramework):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.max_length = kwargs.get("max_length", 4096)
+        self.do_sample = kwargs.get("do_sample", False)
+        self.temperature = kwargs.get("temperature", None)
+
         self.outlines_model = outlines_transformers(
             self.llm_model,
             device=self.device
@@ -22,19 +25,30 @@ class OutlinesFramework(BaseFramework):
             self.outlines_model.model.config.eos_token_id[-1]
         )
         if self.outlines_model.model.generation_config:
-            self.outlines_model.model.generation_config.temperature = None
+            self.outlines_model.model.generation_config.do_sample = self.do_sample
+            self.outlines_model.model.generation_config.temperature = self.temperature
             self.outlines_model.model.generation_config.pad_token_id = (
                 self.outlines_model.model.config.eos_token_id[-1]
             )
 
-        self.sampler = GreedySampler()
+        if self.do_sample or self.temperature:
+            self.sampler = MultinomialSampler(temperature=self.temperature)
+        else:
+            self.sampler = GreedySampler()
+
         self.outline_generator = outlines_json(
             self.outlines_model, self.response_model, sampler=self.sampler
         )
 
-    def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
+    def run(
+        self,
+        n_runs: int,
+        expected_response: Any = None,
+        inputs: dict = {},
+        seeds: list[int] | None = None,
+    ) -> ExperimentResult:
 
-        @experiment(n_runs=n_runs, expected_response=expected_response)
+        @experiment(n_runs=n_runs, expected_response=expected_response, seeds=seeds)
         def run_experiment(inputs):
             prompt = inputs.get("prompt")
             if not prompt:

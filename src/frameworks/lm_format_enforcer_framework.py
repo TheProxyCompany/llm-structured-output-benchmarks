@@ -15,16 +15,18 @@ class LMFormatEnforcerFramework(BaseFramework):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.parser = JsonSchemaParser(self.response_model.schema())
-        max_length = kwargs.get("max_length", 4096)
+        self.max_length = kwargs.get("max_length", 4096)
+        self.do_sample = kwargs.get("do_sample", False)
+        self.temperature = kwargs.get("temperature", None)
         if self.llm_model_family == "transformers":
             self.hf_pipeline = pipeline(
                 "text-generation",
                 model=self.llm_model,
                 device_map=self.device,
-                max_length=max_length,
-                temperature=None,
+                max_length=self.max_length,
+                temperature=self.temperature,
                 top_p=None,
-                do_sample=False,
+                do_sample=self.do_sample,
                 truncation=True,
             )
             self.prefix_function = build_transformers_prefix_allowed_tokens_fn(
@@ -41,9 +43,15 @@ class LMFormatEnforcerFramework(BaseFramework):
         else:
             raise ValueError(f"Model family: {self.llm_model_family} not supported")
 
-    def run(self, n_runs: int, expected_response: Any = None, inputs: dict = {}) -> ExperimentResult:
+    def run(
+        self,
+        n_runs: int,
+        expected_response: Any = None,
+        inputs: dict = {},
+        seeds: list[int] | None = None,
+    ) -> ExperimentResult:
 
-        @experiment(n_runs=n_runs, expected_response=expected_response)
+        @experiment(n_runs=n_runs, expected_response=expected_response, seeds=seeds)
         def run_experiment(inputs):
             prompt = inputs.get("prompt")
             if not prompt:

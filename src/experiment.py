@@ -4,7 +4,7 @@ import time
 from enum import Enum
 from typing import Any, Callable
 
-
+import numpy as np
 from pydantic import BaseModel
 import torch
 from tqdm import tqdm
@@ -18,6 +18,7 @@ class ExperimentResult:
     latencies: list[float]
     expected_response: Any
     n_runs: int
+    seeds: list[int] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -25,11 +26,14 @@ class ExperimentResult:
             "responses": self.responses,
             "latencies": self.latencies,
             "n_runs": self.n_runs,
+            "seeds": self.seeds,
         }
+
 
 def experiment(
     n_runs: int = 10,
     expected_response: Any = None,
+    seeds: list[int] | None = None,
 ) -> Callable[
     ...,
     ExperimentResult,
@@ -54,10 +58,24 @@ def experiment(
     ) -> Callable[..., ExperimentResult]:
         def wrapper(*args, **kwargs) -> ExperimentResult:
             responses, latencies = [], []
-            for _ in tqdm(range(n_runs), leave=False):
+
+            # If seeds are provided, use them for each run
+            # Otherwise, proceed without explicit seeding
+            for i in tqdm(range(n_runs), leave=False):
                 try:
                     if torch.backends.mps.is_available():
                         torch.mps.empty_cache()
+
+                    # Set seed for this specific run if seeds are provided
+                    if seeds is not None and i < len(seeds):
+                        seed = seeds[i]
+                        # Set seed for all relevant libraries
+                        torch.manual_seed(seed)
+                        np.random.seed(seed)
+
+                        if torch.cuda.is_available():
+                            torch.cuda.manual_seed_all(seed)
+
                     start_time = time.time()
                     response = func(*args, **kwargs)
                     end_time = time.time()
@@ -77,6 +95,7 @@ def experiment(
                 latencies=latencies,
                 expected_response=expected_response,
                 n_runs=n_runs,
+                seeds=seeds,
             )
 
         return wrapper

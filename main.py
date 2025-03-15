@@ -48,15 +48,21 @@ def run_benchmark(
         logger.error(f"Failed to load config from {config_path}: {str(e)}")
         raise typer.Exit(1)
 
-    global_seed = np.random.randint(0, 2**32 - 1)
-    logger.info(f"Global seed: {global_seed}")
+    global_seeds: list[int] = []
+    data_seed: int | None = None
     # Run benchmarks for each framework
     for config_key, config_values in configs.items():
         for config in config_values:
             results = []
             task = config["task"]
             n_runs = config["n_runs"]
-            config["init_kwargs"]["seed"] = global_seed
+            sample_rows = config["init_kwargs"].get("sample_rows")
+            if "data_seed" in config["init_kwargs"]:
+                data_seed = config["init_kwargs"]["data_seed"]
+            if len(global_seeds) < n_runs:
+                new_seed_count = n_runs - len(global_seeds)
+                new_seeds = np.random.randint(0, 2**32 - 1, size=new_seed_count)
+                global_seeds.extend(new_seeds)
 
             if task not in tasks_to_run:
                 continue
@@ -66,6 +72,7 @@ def run_benchmark(
                 framework_instance = factory(
                     config_key, task=task, device=device, **config["init_kwargs"]
                 )
+                framework_instance.set_source_data(sample_rows, data_seed)
                 logger.info(f"Initialized {type(framework_instance).__name__}")
 
             except Exception as e:
@@ -83,12 +90,14 @@ def run_benchmark(
                         task=task,
                         n_runs=n_runs,
                         row=row,
+                        seeds=global_seeds,
                     )
                     results.append(experiment_result)
             else:
                 experiment_result = framework_instance.run_experiment(
                     task=task,
                     n_runs=n_runs,
+                    seeds=global_seeds,
                 )
                 results.append(experiment_result)
 
