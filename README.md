@@ -1,15 +1,15 @@
-# 🧩 LLM Structured Output Benchmarks
+# LLM Structured Output Benchmarks
 
 Benchmark various Structured Output frameworks:
     - Outlines
     - LMFormatEnforcer
     - Proxy Structuring Engine
 
-This is a quick fork from the original [llm-structured-output-benchmarks](https://github.com/stephenleo/llm-structured-output-benchmarks) repository.
+This is a fork from the original [llm-structured-output-benchmarks](https://github.com/stephenleo/llm-structured-output-benchmarks) repository.
 
-## 🏆 Benchmark Results [2025-02-26]
+## 🏆 Benchmark Results [2025-03-19]
 
-### Function Calling Results
+### Function Calling Results (Llama-3.1-8b-Instruct)
 
 | Metric | LMFormatEnforcerFramework | PSEFramework | OutlinesFramework |
 |:------|:-------------------------:|:------------:|:-----------------:|
@@ -34,19 +34,8 @@ This is a quick fork from the original [llm-structured-output-benchmarks](https:
 3. Raw results will be saved to the `results/` directory
 
 4. Generate results:
-
-   For all tasks:
    ```bash
    python -m main generate-results
-   ```
-
-   For specific tasks:
-   ```bash
-   # Function calling
-   python -m main generate-results --task function_calling
-
-   # Synthetic data generation
-   python -m main generate-results --task synthetic_data_generation
    ```
 
 ## Benchmark methods
@@ -70,9 +59,8 @@ This is a quick fork from the original [llm-structured-output-benchmarks](https:
         - Average Correct Function Name: Percentage of exact matches with expected function names
         - Average Correct Function Args: Score (0-100%) based on expected argument presence and matching
 
-
 All benchmarks were conducted under identical conditions using an Apple M2 Ultra machine with 192GB RAM.
-We used PyTorch and the MPS backend for all benchmarks, using `meta-llama/Llama-3.1-8b-Instruct` as the evaluation LLM.
+We used PyTorch for all benchmarks, using `meta-llama/Llama-3.1-8b-Instruct` as the evaluation LLM.
 We intend for these results to be reproducible by anyone who follows the instructions in the README.
 
 ## 🎯 Scope
